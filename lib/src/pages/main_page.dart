@@ -1,7 +1,5 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_ace/src/components/image_data.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:intl/intl.dart';
 
@@ -16,15 +14,14 @@ class _MainPageState extends State<MainPage> {
   @override
   void initState() {
     super.initState();
-    // Start the timer to update the UI every second
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+    // Start the timer to update the UI every 1 second (60 times per second)
+    _timer = Timer.periodic(const Duration(milliseconds: 1000 ~/ 60), (timer) {
       setState(() {});
     });
   }
 
   @override
   void dispose() {
-    // Dispose the timer when the widget is disposed
     _timer.cancel();
     super.dispose();
   }
@@ -59,14 +56,20 @@ class _MainPageState extends State<MainPage> {
     String formattedNextEgressionDate =
         DateFormat('yyyy-MM-dd').format(nextEgressionDate);
 
+    int totalServiceDays = dischargeDate.difference(joinDate).inDays;
+    int currentServiceDays = now.difference(joinDate).inDays;
+    int remainingServiceDays = dischargeDate.difference(now).inDays;
+    int daysUntilNextVacation = now.difference(nextVacationDate).inDays;
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Main Page'),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: Padding(
+      backgroundColor: Colors.white,
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Container(
                 color: Colors.grey.shade200,
@@ -81,30 +84,60 @@ class _MainPageState extends State<MainPage> {
                 ),
               ),
             ),
-          ),
 
-          // 전역 프로그레스 바
-          buildProgressBar(
-            context,
-            title: '전역',
-            progress: joinProgress,
-            endDate: formattedDischargeDate,
-            fullWidth: true, // Set to true to occupy full width
-          ),
-
-          // 휴가 및 외출 프로그레스 바
-          Expanded(
-            child: buildProgressBars(
+            // 전역 프로그레스 바
+            buildProgressBar(
               context,
-              vacationTitle: '다음 휴가',
-              vacationProgress: vacationProgress,
-              nextVacationDate: formattedNextVacationDate,
-              egressionTitle: '다음 외출',
-              egressionProgress: egressionProgress,
-              nextEgressionDate: formattedNextEgressionDate,
+              title: '전역',
+              progress: joinProgress,
+              endDate: formattedDischargeDate,
+              titleFontSize: 13,
+              topDateFontSize: 12,
+              bottomPercentFontSize: 12,
+              fullWidth: true,
+              bottomPadding: 0,
             ),
-          ),
-        ],
+
+            // 휴가 및 외출 프로그레스 바
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              child: buildProgressBars(
+                context,
+                vacationTitle: '다음 휴가',
+                vacationProgress: vacationProgress,
+                nextVacationDate: formattedNextVacationDate,
+                egressionTitle: '다음 외출',
+                egressionProgress: egressionProgress,
+                nextEgressionDate: formattedNextEgressionDate,
+                titleFontSize: 12,
+                topDateFontSize: 11,
+                bottomPercentFontSize: 11,
+                topPadding: 0,
+              ),
+            ),
+
+            // 일정 관련 Text
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  buildInfoRow('전체 복무일', '$totalServiceDays'),
+                  buildLine(),
+                  buildInfoRow('현재 복무일', '$currentServiceDays'),
+                  buildLine(),
+                  buildInfoRow('남은 복무일', '$remainingServiceDays'),
+                  buildLine(),
+                  buildInfoRow('다음 휴가까지', '$daysUntilNextVacation')
+                ],
+              ),
+            ),
+            const Text(
+              '※제공되는 정보는 법적 효력 및 행정 효력이 없습니다.\n\n\n',
+              style: TextStyle(fontSize: 10),
+            )
+          ],
+        ),
       ),
     );
   }
@@ -114,7 +147,11 @@ class _MainPageState extends State<MainPage> {
     required String title,
     required double progress,
     required String endDate,
+    required double titleFontSize,
+    required double topDateFontSize,
+    required double bottomPercentFontSize,
     bool fullWidth = false,
+    double bottomPadding = 10.0,
   }) {
     String formattedProgress = title == '전역'
         ? (progress * 100).toStringAsFixed(7)
@@ -123,30 +160,30 @@ class _MainPageState extends State<MainPage> {
     return Container(
       height: MediaQuery.of(context).size.height * 0.125,
       color: Colors.white,
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: EdgeInsets.only(left: 20, right: 20, bottom: bottomPadding),
       child: Stack(
         alignment: Alignment.center,
         children: [
-          Container(
+          SizedBox(
             width: fullWidth
                 ? MediaQuery.of(context).size.width - 40
                 : (MediaQuery.of(context).size.width - 40) / 2,
             child: LinearPercentIndicator(
               percent: progress,
-              lineHeight: 10,
+              lineHeight: 5,
               backgroundColor: Colors.blueGrey.shade100,
               progressColor: Colors.teal.shade400,
             ),
           ),
           Positioned(
-            top: 20,
+            top: 25,
             left: 10,
             child: Padding(
               padding: const EdgeInsets.only(bottom: 10),
               child: Text(
                 title,
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: titleFontSize,
                   fontWeight: FontWeight.normal,
                   color: Colors.black,
                 ),
@@ -154,14 +191,14 @@ class _MainPageState extends State<MainPage> {
             ),
           ),
           Positioned(
-            top: 20,
+            top: 25,
             right: 10,
             child: Padding(
               padding: const EdgeInsets.only(bottom: 10),
               child: Text(
                 endDate,
-                style: const TextStyle(
-                  fontSize: 13,
+                style: TextStyle(
+                  fontSize: topDateFontSize,
                   fontWeight: FontWeight.normal,
                   color: Colors.black,
                 ),
@@ -169,20 +206,19 @@ class _MainPageState extends State<MainPage> {
             ),
           ),
           Positioned(
-            bottom: 20,
+            bottom: 27,
             right: 10,
             child: Padding(
-              padding: const EdgeInsets.only(top: 10),
-              child: Text(
-                '$formattedProgress%',
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.normal,
-                  color: Colors.black,
-                ),
-              ),
-            ),
-          ),
+                padding: const EdgeInsets.only(top: 10),
+                child: Text(
+                  '$formattedProgress%',
+                  style: TextStyle(
+                    fontSize: bottomPercentFontSize,
+                    fontWeight: FontWeight.normal,
+                    color: Colors.black,
+                  ),
+                )),
+          )
         ],
       ),
     );
@@ -196,29 +232,70 @@ class _MainPageState extends State<MainPage> {
     required String egressionTitle,
     required double egressionProgress,
     required String nextEgressionDate,
+    required double titleFontSize,
+    required double topDateFontSize,
+    required double bottomPercentFontSize,
+    double topPadding = 0,
   }) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Expanded(
-          child: buildProgressBar(
-            context,
-            title: vacationTitle,
-            progress: vacationProgress,
-            endDate: nextVacationDate,
+    return Padding(
+      padding: EdgeInsets.only(top: topPadding),
+      child: Row(
+        children: [
+          Expanded(
+            child: buildProgressBar(
+              context,
+              title: vacationTitle,
+              progress: vacationProgress,
+              endDate: nextVacationDate,
+              titleFontSize: titleFontSize,
+              topDateFontSize: topDateFontSize,
+              bottomPercentFontSize: bottomPercentFontSize,
+              bottomPadding: 0,
+            ),
           ),
-        ),
-        Expanded(
-          child: buildProgressBar(
-            context,
-            title: egressionTitle,
-            progress: egressionProgress,
-            endDate: nextEgressionDate,
-          ),
-        ),
-      ],
+          Expanded(
+            child: buildProgressBar(
+              context,
+              title: egressionTitle,
+              progress: egressionProgress,
+              endDate: nextEgressionDate,
+              titleFontSize: titleFontSize,
+              topDateFontSize: topDateFontSize,
+              bottomPercentFontSize: bottomPercentFontSize,
+              bottomPadding: 0,
+            ),
+          )
+        ],
+      ),
     );
   }
+
+  Widget buildInfoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(fontSize: 13.0),
+          ),
+          Text(
+            value,
+            style: const TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+Widget buildLine() {
+  return Container(
+    height: 0.5,
+    width: double.infinity,
+    color: Colors.grey,
+  );
 }
 
 void main() {
