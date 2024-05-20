@@ -1,7 +1,7 @@
-import 'package:http/http.dart' as http;
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import '../app.dart';
+import './register.dart';
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
@@ -14,19 +14,19 @@ class _LoginState extends State<Login> {
   TextEditingController controller = TextEditingController();
   TextEditingController controller2 = TextEditingController();
 
-  Future<String> _callAPI() async {
+  double _offstage = 0.0;
+  String message = "";
+
+  Future<String> _callAPI(String idText) async {
     var url = Uri.parse(
       'http://navy-combat-power-management-platform.shop/get.php',
     );
-    var response = await Dio().getUri(url);
+    var response = await Dio().postUri(url, data: {'username': idText});
     print('Response body: ${response.data}');
-    return '${response.data}';
-
-    // url = Uri.parse('http://navy-combat-power-management-platform.shop/feedback.php');
-    // response = await Dio().postUri(url, data: {'username': 'dsa', 'feedback_text': 'asd'});
-    //
-    // print('Response status: ${response.statusCode}');
-    // print('Response body: ${response.data}');
+    if(response.data == false){
+      return "";
+    }
+    return '${response.data['pwd']}';
   }
 
 
@@ -36,7 +36,7 @@ class _LoginState extends State<Login> {
       appBar: AppBar(
         title: Text('Log in'),
         elevation: 0.0,
-        backgroundColor: Colors.grey,
+        backgroundColor: Colors.white,
         centerTitle: true,
       ),
       body: GestureDetector(
@@ -66,7 +66,7 @@ class _LoginState extends State<Login> {
                             controller: controller,
                             autofocus: true,
                             decoration: InputDecoration(labelText: '군번'),
-                            keyboardType: TextInputType.emailAddress,
+                            keyboardType: TextInputType.number,
                           ),
                           TextField(
                             controller: controller2,
@@ -74,6 +74,49 @@ class _LoginState extends State<Login> {
                             keyboardType: TextInputType.text,
                             obscureText: true,
                           ),
+                          Opacity(
+                            opacity: _offstage,
+                            child: Text(message, style: TextStyle(color: Colors.red)),
+                          ),
+                          SizedBox(
+                            height: 40.0,
+                          ),
+                          ButtonTheme(
+                              //minWidth: 100.0,
+                              //height: 50.0,
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  Future<String> future = _callAPI(controller.text);
+                                  future.then((val) {
+                                    if (controller2.text == val && val != "") {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (BuildContext context) =>
+                                                  MainPage()));
+                                    } else {
+                                      setState(() {
+                                        _offstage = 1.0;
+                                        message = '군번 또는 비밀번호를 잘못 입력했습니다. \n입력하신 내용을 다시 확인해주세요.';
+                                      });
+                                    }
+                                  }).catchError((error) {
+                                    _offstage = 1.0;
+                                    message = '오류: ${error}';
+                                    print('error: ${error}');
+                                  });
+                                },
+                                style: ElevatedButton.styleFrom(
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10)),
+                                    minimumSize: Size(MediaQuery.of(context).size.width, 70),
+                                    backgroundColor: Colors.white10),
+
+                                child: Text(
+                                  "로그인",
+                                  style: TextStyle(fontSize: 24),
+                                ),
+                              )),
                           SizedBox(
                             height: 40.0,
                           ),
@@ -82,35 +125,19 @@ class _LoginState extends State<Login> {
                               height: 50.0,
                               child: ElevatedButton(
                                 onPressed: () {
-                                  String data;
-                                  Future<String> future = _callAPI();
-                                  future.then((val) {
-                                    data = val;
-                                    print(data);
-                                  }).catchError((error) {
-                                    data = error;
-                                    print(data);
-                                  });
-                                  if (controller.text == '12-34567890' &&
-                                      controller2.text == '1234') {
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (BuildContext context) =>
-                                                NextPage()));
-                                  } else {
-                                    showSnackBar(
-                                        context,
-                                        Text(
-                                            '아이디 또는 비밀번호를 잘못 입력했습니다. 입력하신 내용을 다시 확인해주세요.'
-                                            '\n(군번: 12-34567890, 비밀번호: 1234)'));
-                                  }
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (BuildContext context) =>
+                                              RegisterPage()));
                                 },
                                 style: ElevatedButton.styleFrom(
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10)),
                                     minimumSize: Size(200, 50),
-                                    backgroundColor: Colors.grey),
+                                    backgroundColor: Colors.white70),
                                 child: Text(
-                                  "로그인",
+                                  "회원가입",
                                 ),
                               ))
                         ],
@@ -134,11 +161,20 @@ void showSnackBar(BuildContext context, Text text) {
   ScaffoldMessenger.of(context).showSnackBar(snackBar);
 }
 
-class NextPage extends StatelessWidget {
-  const NextPage({Key? key}) : super(key: key);
+class MainPage extends StatelessWidget {
+  const MainPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return App();
+  }
+}
+
+class RegisterPage extends StatelessWidget {
+  const RegisterPage({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Register();
   }
 }
