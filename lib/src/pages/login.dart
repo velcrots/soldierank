@@ -63,14 +63,18 @@ class _LoginState extends State<Login> {
                           TextField(
                             controller: idController,
                             autofocus: true,
-                            decoration: InputDecoration(labelText: '군번'),
+                            decoration: decoTheme('군번', '군번 (- 없이 입력하세요)'),
                             keyboardType: TextInputType.number,
+                          ),
+
+                          SizedBox(
+                            height: 10,
                           ),
 
                           // 비밀번호 입력 필드
                           TextField(
                             controller: pwdController,
-                            decoration: InputDecoration(labelText: '비밀번호'),
+                            decoration: decoTheme('비밀번호', '비밀번호'),
                             keyboardType: TextInputType.text,
                             obscureText: true,
                           ),
@@ -96,6 +100,7 @@ class _LoginState extends State<Login> {
                                           MaterialPageRoute(
                                               builder: (BuildContext context) =>
                                                   MainPage()));
+                                      loginMessageEnable = 0.0;
                                     } else {
                                       setState(() {setMessage('군번 또는 비밀번호를 잘못 입력했습니다. \n입력하신 내용을 다시 확인해주세요.');});
                                     }
@@ -178,4 +183,25 @@ class RegisterPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Register();
   }
+}
+
+
+InputDecoration decoTheme(title, placeholder) {
+  InputDecoration deco = InputDecoration(
+    labelText: title,
+    hintText: placeholder,
+    labelStyle: TextStyle(color: Colors.grey),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+      borderSide: BorderSide(width: 1, color: Colors.grey),
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+      borderSide: BorderSide(width: 1, color: Colors.grey),
+    ),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+    ),
+  );
+  return deco;
 }
