@@ -17,16 +17,12 @@ class _LoginState extends State<Login> {
   double _offstage = 0.0;
   String message = "";
 
-  Future<String> _callAPI(String idText) async {
+  Future<int> _callAPI(String idText, String pwdText) async {
     var url = Uri.parse(
       'http://navy-combat-power-management-platform.shop/get.php',
     );
-    var response = await Dio().postUri(url, data: {'username': idText});
-    print('Response body: ${response.data}');
-    if(response.data == false){
-      return "";
-    }
-    return '${response.data['pwd']}';
+    var response = await Dio().postUri(url, data: {'username': idText, 'pwd': pwdText});
+    return response.data;
   }
 
 
@@ -86,9 +82,9 @@ class _LoginState extends State<Login> {
                               //height: 50.0,
                               child: ElevatedButton(
                                 onPressed: () {
-                                  Future<String> future = _callAPI(controller.text);
+                                  Future<int> future = _callAPI(controller.text, controller2.text);
                                   future.then((val) {
-                                    if (controller2.text == val && val != "") {
+                                    if (val == 1) {
                                       Navigator.push(
                                           context,
                                           MaterialPageRoute(
