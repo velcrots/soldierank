@@ -1,19 +1,59 @@
 import 'dart:async';
+import 'dart:convert';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:intl/intl.dart';
 
+import '../components/image_data.dart';
+
 class MainPage extends StatefulWidget {
+  String userId = '';
+  MainPage(this.userId, {Key? key}) : super(key: key);
+
   @override
-  _MainPageState createState() => _MainPageState();
+  State<MainPage> createState() => _MainPageState();
 }
 
 class _MainPageState extends State<MainPage> {
   late Timer _timer;
 
+  DateFormat format = DateFormat('yyyy-MM-dd');
+
+  DateTime now = DateTime.now();
+  DateTime joinDate = DateTime(2023, 5, 7);
+  DateTime dischargeDate = DateTime(2024, 11, 6);
+  DateTime preOutingDate = DateTime(2024, 5, 1);
+  DateTime? nextVacationDate;
+  DateTime? nextEgressionDate;
+
+  String soldierType = '';
+
+  Future<Map> _callAPI(String idText) async {
+    var url = Uri.parse(
+      'http://navy-combat-power-management-platform.shop/getInfo.php',
+    );
+    var response = await Dio().postUri(url, data: {'username': idText});
+    Map result = response.data;
+    print(result);
+    return result;
+  }
+
   @override
   void initState() {
     super.initState();
+    Future<Map> future = _callAPI(widget.userId);
+    future.then((val) {
+      soldierType = val['사용자'][0]['군별'];
+      joinDate = format.parseStrict(val['사용자'][0]['입대일']);
+      dischargeDate = format.parseStrict(val['사용자'][0]['전역일']);
+      preOutingDate = format.parseStrict(val['사용자'][0]['최근_복귀일']);
+      nextVacationDate = format.parseStrict(val['휴가'][0]['출발_날짜']);
+      nextEgressionDate = format.parseStrict(val['외출'][0]['출발_날짜']);
+    }).catchError((error) {
+      print('error: $error');
+    });
+
     // Start the timer to update the UI every 1 second (60 times per second)
     _timer = Timer.periodic(const Duration(milliseconds: 1000 ~/ 60), (timer) {
       setState(() {});
@@ -26,40 +66,25 @@ class _MainPageState extends State<MainPage> {
     super.dispose();
   }
 
+  double calProgress(DateTime start, DateTime end){
+    double result = now.difference(start).inSeconds / end.difference(start).inSeconds;
+    return result > 0 && result < 1 ? result : 0;
+  }
   @override
   Widget build(BuildContext context) {
-    DateTime now = DateTime.now();
-    DateTime joinDate = DateTime(2023, 5, 7);
-    DateTime dischargeDate = DateTime(2024, 11, 6);
-    DateTime preOutingDate = DateTime(2023, 5, 1);
-    DateTime nextVacationDate = DateTime(2023, 6, 10);
-    DateTime nextEgressionDate = DateTime(2023, 5, 30);
+    now = DateTime.now();
+    double joinProgress = calProgress(joinDate, dischargeDate);
+    double vacationProgress = nextVacationDate == null ? 0 : calProgress(preOutingDate, nextVacationDate!);
+    double egressionProgress = nextEgressionDate == null ? 0 : calProgress(preOutingDate, nextEgressionDate!);
 
-    double joinProgress =
-        (now.isBefore(joinDate) ? 0 : now.difference(joinDate).inSeconds) /
-            dischargeDate.difference(joinDate).inSeconds;
-
-    double vacationProgress = (now.isBefore(preOutingDate)
-            ? 0
-            : now.difference(preOutingDate).inSeconds) /
-        dischargeDate.difference(nextVacationDate).inSeconds;
-
-    double egressionProgress = (now.isBefore(preOutingDate)
-            ? 0
-            : now.difference(preOutingDate).inSeconds) /
-        dischargeDate.difference(nextEgressionDate).inSeconds;
-
-    String formattedDischargeDate =
-        DateFormat('yyyy-MM-dd').format(dischargeDate);
-    String formattedNextVacationDate =
-        DateFormat('yyyy-MM-dd').format(nextVacationDate);
-    String formattedNextEgressionDate =
-        DateFormat('yyyy-MM-dd').format(nextEgressionDate);
+    String formattedDischargeDate = format.format(dischargeDate);
+    String formattedNextVacationDate = nextVacationDate == null ? '다음 휴가가 없습니다' : format.format(nextVacationDate!);
+    String formattedNextEgressionDate = nextEgressionDate == null ? '다음 외출이 없습니다' : format.format(nextEgressionDate!);
 
     int totalServiceDays = dischargeDate.difference(joinDate).inDays;
     int currentServiceDays = now.difference(joinDate).inDays;
     int remainingServiceDays = dischargeDate.difference(now).inDays;
-    int daysUntilNextVacation = now.difference(nextVacationDate).inDays;
+    int daysUntilNextVacation = nextVacationDate == null ? 0 : nextVacationDate!.difference(now).inDays;
 
     return Scaffold(
       appBar: AppBar(
@@ -76,10 +101,25 @@ class _MainPageState extends State<MainPage> {
                 child: Center(
                   child: Padding(
                     padding: const EdgeInsets.all(20),
-                    child: Image.asset(
-                      'assets/images/avatar.jpg',
-                      fit: BoxFit.contain,
-                    ),
+                    child:((){
+                      switch (soldierType) {
+                        case '육군':
+                          return Image.asset(
+                            AvatarPath.armyAvatar,
+                            fit: BoxFit.contain,
+                          );
+                        case '해군':
+                          return Image.asset(
+                            AvatarPath.navyAvatar,
+                            fit: BoxFit.contain,
+                          );
+                        case '공군':
+                          return Image.asset(
+                            AvatarPath.airForceAvatar,
+                            fit: BoxFit.contain,
+                          );
+                      }
+                    })(),
                   ),
                 ),
               ),
@@ -296,10 +336,4 @@ Widget buildLine() {
     width: double.infinity,
     color: Colors.grey,
   );
-}
-
-void main() {
-  runApp(MaterialApp(
-    home: MainPage(),
-  ));
 }

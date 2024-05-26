@@ -7,7 +7,8 @@ import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:get/get_state_manager/src/simple/get_view.dart';
 
 class App extends GetView<BottomNavController> {
-  const App({Key? key}) : super(key: key);
+  String userId = '';
+  App(this.userId, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +39,7 @@ class App extends GetView<BottomNavController> {
             body: IndexedStack(
               index: controller.pageIndex.value,
               children: [
-                MainPage(),
+                MainPage(userId),
                 AssessmentPage(),
                 Container(
                   child: Center(child: Text('home3')),
