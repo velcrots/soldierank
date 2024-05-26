@@ -105,7 +105,7 @@ class _LoginState extends State<Login> {
                                       setState(() {setMessage('군번 또는 비밀번호를 잘못 입력했습니다. \n입력하신 내용을 다시 확인해주세요.');});
                                     }
                                   }).catchError((error) {
-                                    setMessage('오류: $error');
+                                    setState(() {setMessage('서버 오류: $error');});
                                     print('error: $error');
                                   });
                                 },

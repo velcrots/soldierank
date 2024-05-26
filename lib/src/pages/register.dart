@@ -15,42 +15,40 @@ class _RegisterState extends State<Register> {
   TextEditingController idController = TextEditingController();
   TextEditingController pwdController = TextEditingController();
 
-  TextEditingController startController = TextEditingController();
-  TextEditingController endController = TextEditingController();
+  TextEditingController joinController = TextEditingController();
+  TextEditingController dischargeController = TextEditingController();
 
   TextEditingController posController = TextEditingController();
 
+  DateFormat format = DateFormat('yyyy-MM-dd');
+
   RegExp nameRegex = RegExp(r'^[0-9a-zA-Zㄱ-ㅎ]+$');
-  RegExp dateRegex = RegExp(r'^[0-9]{4}-[0-9]{2}-[0-9]{2}$');
+  RegExp birthRegex = RegExp(r'^[0-9]{8}$');
   RegExp idRegex = RegExp(r'^[0-9]{10}$');
   RegExp pwdRegex = RegExp(r'^[0-9a-zA-Z]+$');
-  double nameMessageEnable = 1.0;
   String nameMessage = "이름을 입력해주세요.";
-  double birthMessageEnable = 1.0;
   String birthMessage = "생년월일을 입력해주세요.";
-  double idMessageEnable = 1.0;
   String idMessage = "군번을 입력해주세요.";
-  double pwdMessageEnable = 1.0;
   String pwdMessage = "비밀번호를 입력해주세요.";
-  double startMessageEnable = 1.0;
-  String startMessage = "입대일을 입력해주세요.";
-  double endMessageEnable = 1.0;
-  String endMessage = "전역일을 입력해주세요.";
+  String joinMessage = "입대일을 입력해주세요.";
+  String dischargeMessage = "전역일을 입력해주세요.";
 
-  String dropdownValue = '육군';
+  String soldierType = '육군';
+
+  bool isCheck = false;
 
   bool validName = false;
   bool validBirth = false;
   bool validId = false;
   bool validPwd = false;
-  bool validStart = false;
-  bool validEnd = false;
+  bool validJoin = false;
+  bool validDischarge = false;
 
-  Future<bool> _callAPI(name, birth, id, pwd, start, end, dropdown, pos) async {
+  Future<bool> _callAPI(name, birth, id, pwd, join, discharge, soldierType, pos, isCheck) async {
     var url = Uri.parse(
       'http://navy-combat-power-management-platform.shop/register.php',
     );
-    var response = await Dio().postUri(url, data: {'name': name, 'birth': birth, 'id': id, 'pwd': pwd, 'start': start, 'end': end, 'dropdown': dropdown, 'pos': pos});
+    var response = await Dio().postUri(url, data: {'name': name, 'birth': birth, 'id': id, 'pwd': pwd, 'join': join, 'discharge': discharge, 'soldierType': soldierType, 'pos': pos, 'isCheck': isCheck ? 1 : 0});
     return response.data;
   }
 
@@ -121,14 +119,14 @@ class _RegisterState extends State<Register> {
 
                             // 이름 오류 메시지
                                   Opacity(
-                                    opacity: nameMessageEnable,
+                                    opacity: validName ? 0.0 : 1.0,
                                     child: Text(nameMessage,
                                       style: TextStyle(color: Colors.red,),),
                                 ),
 
                             // 생년월일 오류 메시지
                             Opacity(
-                                    opacity: birthMessageEnable,
+                                    opacity: validBirth ? 0.0 : 1.0,
                                     child: Text(birthMessage,
                                       style: TextStyle(color: Colors.red)),
                                 ),
@@ -148,7 +146,7 @@ class _RegisterState extends State<Register> {
 
                           // 군번 오류 메시지
                           Opacity(
-                            opacity: idMessageEnable,
+                            opacity: validId ? 0.0 : 1.0,
                             child: Text(idMessage,
                                 style: TextStyle(color: Colors.red)),
                           ),
@@ -168,7 +166,7 @@ class _RegisterState extends State<Register> {
                           
                           // 비밀번호 오류 메시지
                           Opacity(
-                            opacity: pwdMessageEnable,
+                            opacity: validPwd ? 0.0 : 1.0,
                             child: Text(pwdMessage,
                                 style: TextStyle(color: Colors.red)),
                           ),
@@ -184,10 +182,10 @@ class _RegisterState extends State<Register> {
                             Flexible(
                                 flex: 5,
                                 child: TextField(
-                                  controller: startController,
+                                  controller: joinController,
                                   decoration: decoTheme('입대일', '입대일'),
                                   keyboardType: TextInputType.emailAddress,
-                                  onChanged: (text) {setStartMessage(text);}
+                                  onChanged: (text) {setJoinMessage(text);}
                                 )),
 
                             SizedBox(
@@ -204,10 +202,11 @@ class _RegisterState extends State<Register> {
                                     lastDate: DateTime(2040),
                                   ).then((selectedDate) {
                                     setState(() {
-                                      startController.text =
-                                      "${selectedDate!.year.toString()}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.day.toString().padLeft(2, '0')}";
-                                      startMessageEnable = 0.0;
-                                      validStart = true;
+                                      if (selectedDate == null) return;
+                                      DateTime date = selectedDate;
+                                      String joinFormat = format.format(date);
+                                      joinController.text = joinFormat.toString();
+                                      setJoinMessage(joinController.text);
                                     });
                                   });
                                 },
@@ -221,10 +220,10 @@ class _RegisterState extends State<Register> {
                             Flexible(
                                 flex: 5,
                                 child: TextField(
-                                  controller: endController,
+                                  controller: dischargeController,
                                   decoration: decoTheme('전역일', '전역일'),
                                   keyboardType: TextInputType.emailAddress,
-                                  onChanged: (text) {setEndMessage(text);}
+                                  onChanged: (text) {setDischargeMessage(text);}
                                 )),
 
                             SizedBox(
@@ -241,10 +240,11 @@ class _RegisterState extends State<Register> {
                                     lastDate: DateTime(2040),
                                   ).then((selectedDate) {
                                     setState(() {
-                                      endController.text =
-                                      "${selectedDate!.year.toString()}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.day.toString().padLeft(2, '0')}";
-                                      endMessageEnable = 0.0;
-                                      validEnd = true;
+                                      if (selectedDate == null) return;
+                                      DateTime date = selectedDate;
+                                      String dischargeFormat = format.format(date);
+                                      dischargeController.text = dischargeFormat.toString();
+                                      setDischargeMessage(dischargeController.text);
                                     });
                                   });
                                 },
@@ -257,15 +257,15 @@ class _RegisterState extends State<Register> {
 
                                 // 입대일 오류 메시지
                                 Opacity(
-                                  opacity: startMessageEnable,
-                                  child: Text(startMessage,
+                                  opacity: validJoin ? 0.0 : 1.0,
+                                  child: Text(joinMessage,
                                     style: TextStyle(color: Colors.red,),),
                                 ),
 
                                 // 전역일 오류 메시지
                                 Opacity(
-                                  opacity: endMessageEnable,
-                                  child: Text(endMessage,
+                                  opacity: validDischarge ? 0.0 : 1.0,
+                                  child: Text(dischargeMessage,
                                       style: TextStyle(color: Colors.red)),
                                 ),
                               ]),
@@ -279,10 +279,10 @@ class _RegisterState extends State<Register> {
 
                             // 군별 드랍다운
                             DropdownButton<String>(
-                              value: dropdownValue,
+                              value: soldierType,
                               onChanged: (String? newValue) {
                                 setState(() {
-                                  dropdownValue = newValue!;
+                                  soldierType = newValue!;
                                 });
                               },
                               items: <String>['육군', '해군', '공군']
@@ -308,6 +308,23 @@ class _RegisterState extends State<Register> {
                                 )),
                           ]),
 
+                          Padding(
+                            padding: const EdgeInsets.only(left: 15, top: 15),
+                            child: Row(
+                              children: [
+                                Checkbox(
+                                  value: isCheck,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      isCheck = value!;
+                                    });
+                                  },
+                                ),
+                                Text("지휘자")
+                              ],
+                            ),
+                          ),
+
                           SizedBox(
                             height: 20,
                           ),
@@ -322,10 +339,10 @@ class _RegisterState extends State<Register> {
                                       validBirth &&
                                       validId &&
                                       validPwd &&
-                                      validStart &&
-                                      validEnd) {
+                                      validJoin &&
+                                      validDischarge) {
                                     Future<bool> future = _callAPI(
-                                        nameController.text, birthController.text, idController.text, pwdController.text, startController.text, endController.text, dropdownValue, posController.text);
+                                        nameController.text, birthController.text, idController.text, pwdController.text, joinController.text, dischargeController.text, soldierType, posController.text, isCheck);
                                     future.then((val) {
                                       if(val){
                                         Navigator.pop(context, true);
@@ -359,32 +376,31 @@ class _RegisterState extends State<Register> {
     );
   }
   void setNameText(text) {
-    nameMessageEnable = 1.0;
+    validName = false;
     nameMessage = text;
   }
   void setBirthText(text) {
-    birthMessageEnable = 1.0;
+    validBirth = false;
     birthMessage = text;
   }
   void setIdText(text) {
-    idMessageEnable = 1.0;
+    validId = false;
     idMessage = text;
   }
   void setPwdText(text) {
-    pwdMessageEnable = 1.0;
+    validPwd = false;
     pwdMessage = text;
   }
-  void setStartText(text) {
-    startMessageEnable = 1.0;
-    startMessage = text;
+  void setJoinText(text) {
+    validJoin = false;
+    joinMessage = text;
   }
-  void setEndText(text) {
-    endMessageEnable = 1.0;
-    endMessage = text;
+  void setDischargeText(text) {
+    validDischarge = false;
+    dischargeMessage = text;
   }
 
   bool isDate(text){
-    DateFormat format = DateFormat("yyyy-MM-dd");
     try {
       DateTime dateFormat = format.parseStrict(text);
     } catch(e){
@@ -392,12 +408,22 @@ class _RegisterState extends State<Register> {
     }
     return true;
   }
+  void compareStartEnd(){
+    try {
+      DateTime startFormat = format.parseStrict(joinController.text);
+      DateTime endFormat = format.parseStrict(dischargeController.text);
+      if(!endFormat.isAfter(startFormat)){setJoinText('날짜: 전역일이 이후여야 합니다.');validJoin=false;}
+      else {validJoin=true;}
+    } catch(e){
+      print(e);
+    }
+  }
   void setNameMessage(text) {
     setState((){
       validName=false;
       if (nameController.text.isEmpty) {setNameText('이름을 입력해주세요.');}
       else if(!nameRegex.hasMatch(text)){setNameText('이름: 영문 대/소문자, \n    숫자를 사용해 주세요.');}
-      else {nameMessageEnable = 0.0;validName=true;}
+      else {validName=true;}
     });
   }
 
@@ -405,8 +431,8 @@ class _RegisterState extends State<Register> {
     setState((){
       validBirth=false;
       if (birthController.text.isEmpty) {setBirthText('생년월일을 입력해주세요.');}
-      else if(!isDate(text)){setBirthText('날짜: 올바르지 않은 날짜입니다. \n(yyyy-mm-dd)');}
-      else {birthMessageEnable = 0.0;validBirth=true;}
+      else if(!birthRegex.hasMatch(text)){setBirthText('숫자 8자를 입력해주세요.');}
+      else {validBirth=true;}
     });
   }
 
@@ -415,7 +441,7 @@ class _RegisterState extends State<Register> {
       validId=false;
       if (idController.text.isEmpty) {setIdText('군번을 입력해주세요.');}
       else if(!idRegex.hasMatch(text)){setIdText('군번: 숫자 10자를 입력해주세요.');}
-      else {idMessageEnable = 0.0;validId=true;}
+      else {validId=true;}
     });
   }
 
@@ -424,25 +450,27 @@ class _RegisterState extends State<Register> {
       validPwd=false;
       if (pwdController.text.isEmpty) {setPwdText('비밀번호를 입력해주세요.');}
       else if(!pwdRegex.hasMatch(text)){setPwdText('비밀번호: 영문 대/소문자, 숫자를 사용해 주세요.');}
-      else {pwdMessageEnable = 0.0;validPwd=true;}
+      else {validPwd=true;}
     });
   }
 
-  void setStartMessage(text) {
+  void setJoinMessage(text) {
     setState((){
-      validStart=false;
-      if (startController.text.isEmpty) {setStartText('입대일을 입력해주세요.');}
-      else if(!isDate(text)){setStartText('날짜: 올바르지 않은 날짜입니다. \n(yyyy-mm-dd)');}
-      else {startMessageEnable = 0.0;validStart=true;}
+      validJoin=false;
+      if (joinController.text.isEmpty) {setJoinText('입대일을 입력해주세요.');}
+      else if(!isDate(text)){setJoinText('날짜: (yyyy-mm-dd)');}
+      else {validJoin=true;}
+      compareStartEnd();
     });
   }
 
-  void setEndMessage(text) {
+  void setDischargeMessage(text) {
     setState((){
-      validEnd=false;
-      if (endController.text.isEmpty) {setEndText('전역일을 입력해주세요.');}
-      else if(!isDate(text)){setEndText('날짜: 올바르지 않은 날짜입니다. \n(yyyy-mm-dd)');}
-      else {endMessageEnable = 0.0;validEnd=true;}
+      validDischarge=false;
+      if (dischargeController.text.isEmpty) {setDischargeText('전역일을 입력해주세요.');}
+      else if(!isDate(text)){setDischargeText('날짜: (yyyy-mm-dd)');}
+      else {validDischarge=true;}
+      compareStartEnd();
     });
   }
 }
