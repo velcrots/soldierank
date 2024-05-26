@@ -18,7 +18,7 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   late Timer _timer;
 
-  DateFormat format = DateFormat('yyyy-MM-dd');
+  DateFormat format = DateFormat('yyyy-MM-dd HH:mm:ss');
 
   DateTime now = DateTime.now();
   DateTime joinDate = DateTime(2023, 5, 7);
@@ -78,8 +78,8 @@ class _MainPageState extends State<MainPage> {
     double egressionProgress = nextEgressionDate == null ? 0 : calProgress(preOutingDate, nextEgressionDate!);
 
     String formattedDischargeDate = format.format(dischargeDate);
-    String formattedNextVacationDate = nextVacationDate == null ? '다음 휴가가 없습니다' : format.format(nextVacationDate!);
-    String formattedNextEgressionDate = nextEgressionDate == null ? '다음 외출이 없습니다' : format.format(nextEgressionDate!);
+    String formattedNextVacationDate = nextVacationDate == null ? '-' : format.format(nextVacationDate!);
+    String formattedNextEgressionDate = nextEgressionDate == null ? '-' : format.format(nextEgressionDate!);
 
     int totalServiceDays = dischargeDate.difference(joinDate).inDays;
     int currentServiceDays = now.difference(joinDate).inDays;
