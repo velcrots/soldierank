@@ -99,7 +99,7 @@ class _LoginState extends State<Login> {
                                           context,
                                           MaterialPageRoute(
                                               builder: (BuildContext context) =>
-                                                  MainPage()));
+                                                  MainPage(idController.text)));
                                       loginMessageEnable = 0.0;
                                     } else {
                                       setState(() {setMessage('군번 또는 비밀번호를 잘못 입력했습니다. \n입력하신 내용을 다시 확인해주세요.');});
@@ -168,11 +168,12 @@ void showSnackBar(BuildContext context, Text text) {
 }
 
 class MainPage extends StatelessWidget {
-  const MainPage({Key? key}) : super(key: key);
+  String userId = '';
+  MainPage(this.userId, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return App();
+    return App(userId);
   }
 }
 
