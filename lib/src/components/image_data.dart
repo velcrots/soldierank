@@ -22,5 +22,10 @@ class IconsPath {
 }
 
 class AvatarPath {
-  static String get avatar => 'assets/images/avatar.jpg';
+  // armyAvatar2.psd 저작권 LovePik https://kr.lovepik.com/image-401442767/army.html
+  // armyAvatar.png 저작권 LovePik https://kr.lovepik.com/image-380213994/cartoon-soldier-army-clipart-the-boys-the-army-military.html
+  static String get armyAvatar => 'images/armyAvatar.png';
+  static String get navyAvatar => 'images/navyAvatar.jpg';
+  // 저작권 표시 <a href="https://www.flaticon.com/kr/free-icons/" title="공군 아이콘">공군 아이콘 제작자: afitrose - Flaticon</a>
+  static String get airForceAvatar => 'images/airForceAvatar.png';
 }
