@@ -3,8 +3,12 @@ import 'package:flutter_ace/src/app.dart';
 import 'package:flutter_ace/src/binding/init_bindings.dart';
 import 'package:get/get.dart';
 import 'package:flutter_ace/src/pages/login.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/adapters.dart';
 
-void main() {
+void main() async {
+  await Hive.initFlutter();
+  await Hive.openBox('hivebox');
   runApp(const MyApp());
 }
 
