@@ -1,12 +1,11 @@
 import 'dart:async';
-import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_ace/src/components/image_data.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:intl/intl.dart';
 
-import '../components/image_data.dart';
-
+// ignore: must_be_immutable
 class MainPage extends StatefulWidget {
   String userId = '';
   MainPage(this.userId, {Key? key}) : super(key: key);
@@ -18,16 +17,18 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   late Timer _timer;
 
-  DateFormat format = DateFormat('yyyy-MM-dd');
-
-  DateTime now = DateTime.now();
-  DateTime joinDate = DateTime(2023, 5, 7);
-  DateTime dischargeDate = DateTime(2024, 11, 6);
-  DateTime preOutingDate = DateTime(2024, 5, 1);
-  DateTime? nextVacationDate;
-  DateTime? nextEgressionDate;
+  DateFormat format = DateFormat('yyyy-MM-dd HH:mm:ss');
 
   String soldierType = '';
+  DateTime now = DateTime.now();
+  DateTime? joinDate;
+  DateTime? dischargeDate;
+  DateTime? preOutingDate;
+  DateTime? nextVacationDate;
+  DateTime? nextEgressionDate;
+  double globalProgress = 0.0;
+  double vacationProgress = 0.0;
+  double egressionProgress = 0.0;
 
   Future<Map> _callAPI(String idText) async {
     var url = Uri.parse(
@@ -44,19 +45,19 @@ class _MainPageState extends State<MainPage> {
     super.initState();
     Future<Map> future = _callAPI(widget.userId);
     future.then((val) {
-      soldierType = val['사용자'][0]['군별'];
-      joinDate = format.parseStrict(val['사용자'][0]['입대일']);
-      dischargeDate = format.parseStrict(val['사용자'][0]['전역일']);
-      preOutingDate = format.parseStrict(val['사용자'][0]['최근_복귀일']);
-      nextVacationDate = format.parseStrict(val['휴가'][0]['출발_날짜']);
-      nextEgressionDate = format.parseStrict(val['외출'][0]['출발_날짜']);
+      setState(() {
+        soldierType = val['사용자'][0]['군별'];
+        joinDate = _parseDate(val['사용자'][0]['입대일'] ?? '');
+        dischargeDate = _parseDate(val['사용자'][0]['전역일'] ?? '');
+        preOutingDate = _parseDate(val['사용자'][0]['최근_복귀일'] ?? '');
+        nextVacationDate = _parseDate(val['휴가'][0]['출발_날짜'] ?? '');
+        nextEgressionDate = _parseDate(val['외출'][0]['출발_날짜'] ?? '');
+      });
     }).catchError((error) {
       print('error: $error');
     });
-
-    // Start the timer to update the UI every 1 second (60 times per second)
     _timer = Timer.periodic(const Duration(milliseconds: 1000 ~/ 60), (timer) {
-      setState(() {});
+      updateProgress();
     });
   }
 
@@ -66,26 +67,8 @@ class _MainPageState extends State<MainPage> {
     super.dispose();
   }
 
-  double calProgress(DateTime start, DateTime end){
-    double result = now.difference(start).inSeconds / end.difference(start).inSeconds;
-    return result > 0 && result < 1 ? result : 0;
-  }
   @override
   Widget build(BuildContext context) {
-    now = DateTime.now();
-    double joinProgress = calProgress(joinDate, dischargeDate);
-    double vacationProgress = nextVacationDate == null ? 0 : calProgress(preOutingDate, nextVacationDate!);
-    double egressionProgress = nextEgressionDate == null ? 0 : calProgress(preOutingDate, nextEgressionDate!);
-
-    String formattedDischargeDate = format.format(dischargeDate);
-    String formattedNextVacationDate = nextVacationDate == null ? '다음 휴가가 없습니다' : format.format(nextVacationDate!);
-    String formattedNextEgressionDate = nextEgressionDate == null ? '다음 외출이 없습니다' : format.format(nextEgressionDate!);
-
-    int totalServiceDays = dischargeDate.difference(joinDate).inDays;
-    int currentServiceDays = now.difference(joinDate).inDays;
-    int remainingServiceDays = dischargeDate.difference(now).inDays;
-    int daysUntilNextVacation = nextVacationDate == null ? 0 : nextVacationDate!.difference(now).inDays;
-
     return Scaffold(
       appBar: AppBar(
         title: Text('Main Page'),
@@ -101,7 +84,7 @@ class _MainPageState extends State<MainPage> {
                 child: Center(
                   child: Padding(
                     padding: const EdgeInsets.all(20),
-                    child:((){
+                    child: (() {
                       switch (soldierType) {
                         case '육군':
                           return Image.asset(
@@ -129,8 +112,10 @@ class _MainPageState extends State<MainPage> {
             buildProgressBar(
               context,
               title: '전역',
-              progress: joinProgress,
-              endDate: formattedDischargeDate,
+              progress: globalProgress,
+              endDate: dischargeDate != null
+                  ? DateFormat('yyyy-MM-dd').format(dischargeDate!)
+                  : '',
               titleFontSize: 13,
               topDateFontSize: 12,
               bottomPercentFontSize: 12,
@@ -145,10 +130,14 @@ class _MainPageState extends State<MainPage> {
                 context,
                 vacationTitle: '다음 휴가',
                 vacationProgress: vacationProgress,
-                nextVacationDate: formattedNextVacationDate,
+                nextVacationDate: nextVacationDate != null
+                    ? DateFormat('yyyy-MM-dd').format(nextVacationDate!)
+                    : '-',
                 egressionTitle: '다음 외출',
                 egressionProgress: egressionProgress,
-                nextEgressionDate: formattedNextEgressionDate,
+                nextEgressionDate: nextEgressionDate != null
+                    ? DateFormat('yyyy-MM-dd').format(nextEgressionDate!)
+                    : '-',
                 titleFontSize: 12,
                 topDateFontSize: 11,
                 bottomPercentFontSize: 11,
@@ -162,13 +151,32 @@ class _MainPageState extends State<MainPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  buildInfoRow('전체 복무일', '$totalServiceDays'),
+                  buildInfoRow(
+                      '전체 복무일',
+                      dischargeDate != null && joinDate != null
+                          ? dischargeDate!
+                              .difference(joinDate!)
+                              .inDays
+                              .toString()
+                          : ''),
                   buildLine(),
-                  buildInfoRow('현재 복무일', '$currentServiceDays'),
+                  buildInfoRow(
+                      '현재 복무일',
+                      dischargeDate != null && joinDate != null
+                          ? now.difference(joinDate!).inDays.toString()
+                          : ''),
                   buildLine(),
-                  buildInfoRow('남은 복무일', '$remainingServiceDays'),
+                  buildInfoRow(
+                      '남은 복무일',
+                      dischargeDate != null
+                          ? dischargeDate!.difference(now).inDays.toString()
+                          : ''),
                   buildLine(),
-                  buildInfoRow('다음 휴가까지', '$daysUntilNextVacation')
+                  buildInfoRow(
+                      '다음 휴가까지',
+                      nextVacationDate != null
+                          ? now.difference(nextVacationDate!).inDays.toString()
+                          : '-')
                 ],
               ),
             ),
@@ -180,6 +188,60 @@ class _MainPageState extends State<MainPage> {
         ),
       ),
     );
+  }
+
+  DateTime _parseDate(String dateString) {
+    List<String> components = dateString.split(' ');
+
+    if (components.length == 1) {
+      return DateFormat('yyyy-MM-dd').parse(dateString);
+    } else {
+      return DateFormat('yyyy-MM-dd HH:mm:ss').parse(dateString);
+    }
+  }
+
+  double _calculateProgress(DateTime startDate, DateTime endDate) {
+    // 현재 시간을 가져옴
+    DateTime now = DateTime.now();
+
+    // Calculating total duration in seconds
+    int totalDurationInSeconds = endDate.difference(startDate).inSeconds;
+
+    // Calculating the remaining duration in seconds
+    int remainingDurationInSeconds = endDate.difference(now).inSeconds;
+
+    // Calculating the progress
+    double progress = (totalDurationInSeconds - remainingDurationInSeconds) /
+        totalDurationInSeconds;
+
+    // Making sure progress is between 0 and 1
+    progress = progress.clamp(0.0, 1.0);
+
+    return progress;
+  }
+
+  void updateProgress() {
+    setState(() {
+      // 현재 시간을 가져옴
+      now = DateTime.now();
+
+      // 전역 프로그레스 바 업데이트
+      globalProgress = (joinDate != null && dischargeDate != null)
+          ? _calculateProgress(joinDate!, dischargeDate!)
+          : 0;
+
+      // 휴가 및 외출 프로그레스 바 업데이트
+      vacationProgress = (preOutingDate != null &&
+              nextVacationDate != null &&
+              dischargeDate != null)
+          ? _calculateProgress(preOutingDate!, nextVacationDate!)
+          : 0;
+      egressionProgress = (preOutingDate != null &&
+              nextEgressionDate != null &&
+              dischargeDate != null)
+          ? _calculateProgress(preOutingDate!, nextEgressionDate!)
+          : 0;
+    });
   }
 
   Widget buildProgressBar(
@@ -249,15 +311,16 @@ class _MainPageState extends State<MainPage> {
             bottom: 27,
             right: 10,
             child: Padding(
-                padding: const EdgeInsets.only(top: 10),
-                child: Text(
-                  '$formattedProgress%',
-                  style: TextStyle(
-                    fontSize: bottomPercentFontSize,
-                    fontWeight: FontWeight.normal,
-                    color: Colors.black,
-                  ),
-                )),
+              padding: const EdgeInsets.only(top: 10),
+              child: Text(
+                '$formattedProgress%',
+                style: TextStyle(
+                  fontSize: bottomPercentFontSize,
+                  fontWeight: FontWeight.normal,
+                  color: Colors.black,
+                ),
+              ),
+            ),
           )
         ],
       ),
@@ -322,18 +385,21 @@ class _MainPageState extends State<MainPage> {
           ),
           Text(
             value,
-            style: const TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+              fontSize: 13.0,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ],
       ),
     );
   }
-}
 
-Widget buildLine() {
-  return Container(
-    height: 0.5,
-    width: double.infinity,
-    color: Colors.grey,
-  );
+  Widget buildLine() {
+    return Container(
+      height: 0.5,
+      width: double.infinity,
+      color: Colors.grey,
+    );
+  }
 }
