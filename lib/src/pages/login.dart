@@ -89,7 +89,7 @@ class _LoginState extends State<Login> {
                                           context,
                                           MaterialPageRoute(
                                               builder: (BuildContext context) =>
-                                                  MainPage()));
+                                                  MainPage(controller.text)));
                                     } else {
                                       setState(() {
                                         _offstage = 1.0;
@@ -158,11 +158,12 @@ void showSnackBar(BuildContext context, Text text) {
 }
 
 class MainPage extends StatelessWidget {
-  const MainPage({Key? key}) : super(key: key);
+  String userId = '';
+  MainPage(this.userId, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return App();
+    return App(userId);
   }
 }
 
