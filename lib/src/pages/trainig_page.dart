@@ -29,10 +29,10 @@ class _TrainingPageState extends State<TrainingPage> {
   void initState() {
     super.initState();
     _controller = VideoPlayerController.networkUrl(Uri.parse(//https://www.youtube.com/watch?v=hzWkLIjXhEU
-        "https://www.shutterstock.com/shutterstock/videos/1083786064/preview/stock-footage-multinational-people-and-global-communication-network-concept-social-media.webm"))
+        "https://www.shutterstock.com/shutterstock/videos/1063202605/preview/stock-footage-circa-s-american-anti-aircraft-units-practice-their-marksmanship-in-daylight-and-at-nighttime.webm"))
       ..initialize();
     _controller.setPlaybackSpeed(1);
-    _controller.play();
+    //_controller.play();
 
     _controller.addListener(() async {
       int max = _controller.value.duration.inSeconds;
