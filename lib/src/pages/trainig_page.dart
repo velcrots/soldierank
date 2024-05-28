@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_ace/src/components/image_data.dart';
 import 'package:video_player/video_player.dart';
 import 'package:flutter/services.dart';
 
@@ -11,7 +12,12 @@ class TrainingPage extends StatefulWidget {
 }
 
 class _TrainingPageState extends State<TrainingPage> {
-
+  List<String> playlist = [
+    'https://www.shutterstock.com/shutterstock/videos/3908891/preview/stock-footage--s-air-force-personnel-start-planning-a-new-mission-in-the-vietnam-war-in-includes-shots.webm',
+    'https://www.shutterstock.com/shutterstock/videos/6286064/preview/stock-footage-circa-s-the-united-states-army-trains-it-s-soldiers-for-fighting-in-vietnam-in-the-s.webm',
+    'https://www.shutterstock.com/shutterstock/videos/4836392/preview/stock-footage--s-the-korean-war-rages-on-and-army-combat-teams-engage-in-battle-with-a-wide-variety-of.webm',
+    'https://www.shutterstock.com/shutterstock/videos/4397513/preview/stock-footage--s-unedited-raw-silent-footage-of-the-tet-offensive-attack-on-the-tan-son-nhut-airbase.webm',
+  ];
   Future<int> _callAPI(String idText, String pwdText) async {
     var url = Uri.parse(
       'http://navy-combat-power-management-platform.shop/get.php',
@@ -28,11 +34,10 @@ class _TrainingPageState extends State<TrainingPage> {
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.networkUrl(Uri.parse(//https://www.youtube.com/watch?v=hzWkLIjXhEU
-        "https://www.shutterstock.com/shutterstock/videos/1063202605/preview/stock-footage-circa-s-american-anti-aircraft-units-practice-their-marksmanship-in-daylight-and-at-nighttime.webm"))
+    _controller = VideoPlayerController.networkUrl(Uri.parse(
+        playlist[0]))
       ..initialize();
     _controller.setPlaybackSpeed(1);
-    //_controller.play();
 
     _controller.addListener(() async {
       int max = _controller.value.duration.inSeconds;
@@ -63,7 +68,85 @@ class _TrainingPageState extends State<TrainingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("Training Page")),
-      body: Stack(
+      body: ListView(
+        children: [player(),playList()]
+      ),
+    );
+  }
+
+  Column playList() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        SizedBox(height: 10),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 1,
+            childAspectRatio: 3,
+            crossAxisSpacing: 10.0,
+            mainAxisSpacing: 10.0,
+          ),
+          itemCount: 10,
+          itemBuilder: (context, index) {
+            return GestureDetector(
+              onTap: () {
+                setState(() {
+                  _controller.pause();
+                  _controller = VideoPlayerController.networkUrl(Uri.parse(
+                      index + 1 <= playlist.length ? playlist[index] : playlist[0]))
+                    ..initialize();
+                  _controller.setPlaybackSpeed(1);
+
+                  _controller.addListener(() async {
+                    int max = _controller.value.duration.inSeconds;
+                    setState(() {
+                      aspectRatio = _controller.value.aspectRatio;
+                      position = _controller.value.position;
+                      progress = (position.inSeconds / max * 100).isNaN
+                          ? 0
+                          : position.inSeconds / max * 100;
+                    });
+                  });
+                  print(index);
+                });
+              },
+              child: Row(children: [
+                SizedBox(width: 10),
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Container(
+                      width: 100,
+                      height: 100,
+                      color: Colors.black,
+                      child: Center(
+                          child: Image.asset(
+                        AvatarPath.navyAvatar,
+                        fit: BoxFit.contain,
+                      )),
+                    ),
+                  ),
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('제목$index'),
+                    SizedBox(height: 10),
+                    Text('2024-06-${index + 1} 시청 완료'),
+                  ],),
+              ]),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Stack player() {
+      return Stack(
         children: [
           if (aspectRatio != null) ...[
             Center(
@@ -170,7 +253,6 @@ class _TrainingPageState extends State<TrainingPage> {
             )
           ]
         ],
-      ),
     );
   }
 }
