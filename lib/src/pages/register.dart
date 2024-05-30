@@ -22,7 +22,7 @@ class _RegisterState extends State<Register> {
 
   DateFormat format = DateFormat('yyyy-MM-dd');
 
-  RegExp nameRegex = RegExp(r'^[0-9a-zA-Zㄱ-ㅎ]+$');
+  RegExp nameRegex = RegExp(r'^[0-9a-zA-Zㄱ-ㅣ가-힣]+$');
   RegExp birthRegex = RegExp(r'^[0-9]{8}$');
   RegExp idRegex = RegExp(r'^[0-9]{10}$');
   RegExp pwdRegex = RegExp(r'^[0-9a-zA-Z]+$');
@@ -94,7 +94,7 @@ class _RegisterState extends State<Register> {
                                 child: TextField(
                                   controller: nameController,
                                   decoration: decoTheme('이름', '이름'),
-                                  keyboardType: TextInputType.emailAddress,
+                                  keyboardType: TextInputType.text,
                                   onChanged: (text) {setNameMessage(text);}
                                 )),
 
@@ -108,7 +108,7 @@ class _RegisterState extends State<Register> {
                                 child: TextField(
                                   controller: birthController,
                                   decoration: decoTheme('생년월일', '생년월일 8자리'),
-                                  keyboardType: TextInputType.emailAddress,
+                                  keyboardType: TextInputType.number,
                                   onChanged: (text) {setBirthMessage(text);}
                                 )),
                           ]),
@@ -140,7 +140,7 @@ class _RegisterState extends State<Register> {
                           TextField(
                             controller: idController,
                             decoration: decoTheme('군번', '군번 (- 없이 입력하세요)'),
-                            keyboardType: TextInputType.emailAddress,
+                            keyboardType: TextInputType.number,
                             onChanged: (text) {setIdMessage(text);}
                           ),
 
@@ -159,7 +159,7 @@ class _RegisterState extends State<Register> {
                           TextField(
                             controller: pwdController,
                             decoration: decoTheme('비밀번호', '비밀번호'),
-                            keyboardType: TextInputType.emailAddress,
+                            keyboardType: TextInputType.text,
                             obscureText: true,
                             onChanged: (text) {setPwdMessage(text);}
                           ),
@@ -184,7 +184,7 @@ class _RegisterState extends State<Register> {
                                 child: TextField(
                                   controller: joinController,
                                   decoration: decoTheme('입대일', '입대일'),
-                                  keyboardType: TextInputType.emailAddress,
+                                  keyboardType: TextInputType.number,
                                   onChanged: (text) {setJoinMessage(text);}
                                 )),
 
@@ -222,7 +222,7 @@ class _RegisterState extends State<Register> {
                                 child: TextField(
                                   controller: dischargeController,
                                   decoration: decoTheme('전역일', '전역일'),
-                                  keyboardType: TextInputType.emailAddress,
+                                  keyboardType: TextInputType.number,
                                   onChanged: (text) {setDischargeMessage(text);}
                                 )),
 
@@ -304,7 +304,7 @@ class _RegisterState extends State<Register> {
                                 child: TextField(
                                   controller: posController,
                                   decoration: decoTheme('직별', '직별'),
-                                  keyboardType: TextInputType.emailAddress,
+                                  keyboardType: TextInputType.text,
                                 )),
                           ]),
 
