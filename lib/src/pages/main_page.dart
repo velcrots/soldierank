@@ -1,70 +1,129 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_ace/src/components/image_data.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:intl/intl.dart';
 
-// ignore: must_be_immutable
 class MainPage extends StatefulWidget {
-  String userId = '';
-  MainPage(this.userId, {Key? key}) : super(key: key);
+  final String userId;
+
+  const MainPage(this.userId, {super.key});
 
   @override
   State<MainPage> createState() => _MainPageState();
 }
 
 class _MainPageState extends State<MainPage> {
-  late Timer _timer;
-
-  DateFormat format = DateFormat('yyyy-MM-dd HH:mm:ss');
-
+  late Timer _globalTimer;
+  late Timer _vacationTimer;
+  late Timer _egressionTimer;
+  late DateFormat format;
   String soldierType = '';
-  DateTime now = DateTime.now();
   DateTime? joinDate;
   DateTime? dischargeDate;
   DateTime? preOutingDate;
   DateTime? nextVacationDate;
   DateTime? nextEgressionDate;
-  double globalProgress = 0.0;
-  double vacationProgress = 0.0;
-  double egressionProgress = 0.0;
-
-  Future<Map> _callAPI(String idText) async {
-    var url = Uri.parse(
-      'http://navy-combat-power-management-platform.shop/getInfo.php',
-    );
-    var response = await Dio().postUri(url, data: {'username': idText});
-    Map result = response.data;
-    print(result);
-    return result;
-  }
+  int globalProgress = 0;
+  int vacationProgress = 0;
+  int egressionProgress = 0;
+  double requireSecondGL = 0.0;
+  double requireSecondNV = 0.0;
+  double requireSecondNE = 0.0;
 
   @override
   void initState() {
     super.initState();
-    Future<Map> future = _callAPI(widget.userId);
-    future.then((val) {
-      setState(() {
-        soldierType = val['사용자'][0]['군별'];
-        joinDate = _parseDate(val['사용자'][0]['입대일'] ?? '');
-        dischargeDate = _parseDate(val['사용자'][0]['전역일'] ?? '');
-        preOutingDate = _parseDate(val['사용자'][0]['최근_복귀일'] ?? '');
-        nextVacationDate = _parseDate(val['휴가'][0]['출발_날짜'] ?? '');
-        nextEgressionDate = _parseDate(val['외출'][0]['출발_날짜'] ?? '');
-      });
-    }).catchError((error) {
-      print('error: $error');
-    });
-    _timer = Timer.periodic(const Duration(milliseconds: 1000 ~/ 60), (timer) {
-      updateProgress();
-    });
+    format = DateFormat('yyyy-MM-dd HH:mm:ss');
+    _fetchUserData();
   }
 
   @override
   void dispose() {
-    _timer.cancel();
+    _globalTimer.cancel();
+    _vacationTimer.cancel();
+    _egressionTimer.cancel();
     super.dispose();
+  }
+
+  Future<void> _fetchUserData() async {
+    try {
+      final result = await _callAPI(widget.userId);
+      setState(() {
+        soldierType = result['사용자'][0]['군별'];
+        joinDate = _parseDate(result['사용자'][0]['입대일'] ?? '');
+        dischargeDate =
+            _parseDate(result['사용자'][0]['전역일'] ?? '').add(Duration(days: 1));
+        preOutingDate = _parseDate(result['사용자'][0]['최근_복귀일'] ?? '');
+        nextVacationDate = _parseDate(result['휴가'][0]['출발_날짜'] ?? '');
+        nextEgressionDate = _parseDate(result['외출'][0]['출발_날짜'] ?? '');
+
+        if (joinDate != null && dischargeDate != null) {
+          requireSecondGL =
+              _calculateRequireSecond(joinDate!, dischargeDate!, 7);
+        }
+
+        if (preOutingDate != null && nextVacationDate != null) {
+          requireSecondNV =
+              _calculateRequireSecond(preOutingDate!, nextVacationDate!, 5);
+        }
+
+        if (preOutingDate != null && nextEgressionDate != null) {
+          requireSecondNE =
+              _calculateRequireSecond(preOutingDate!, nextEgressionDate!, 5);
+        }
+        _setInitProgress();
+        _startTimers();
+      });
+    } catch (error) {
+      print('Error fetching user data: $error');
+    }
+  }
+
+  Future<Map<String, dynamic>> _callAPI(String idText) async {
+    final url = Uri.parse(
+        'http://navy-combat-power-management-platform.shop/getInfo.php');
+    final response = await Dio().postUri(url, data: {'username': idText});
+    return response.data;
+  }
+
+  // TODO : 정확도 이슈 해결
+  void _startTimers() {
+    _startGlobalTimer();
+    _startVacationTimer();
+    _startEgressionTimer();
+  }
+
+  void _startGlobalTimer() async {
+    await Future.delayed(
+        Duration(microseconds: (requireSecondGL * 1000000).toInt()));
+    _globalTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+      setState(() {
+        globalProgress += 1;
+      });
+    });
+  }
+
+  void _startVacationTimer() async {
+    await Future.delayed(
+        Duration(microseconds: (requireSecondNV * 1000000).toInt()));
+    _vacationTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+      setState(() {
+        vacationProgress += 1;
+      });
+    });
+  }
+
+  void _startEgressionTimer() async {
+    await Future.delayed(
+        Duration(microseconds: (requireSecondNE * 1000000).toInt()));
+    _egressionTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+      setState(() {
+        egressionProgress += 1;
+      });
+    });
   }
 
   @override
@@ -101,18 +160,18 @@ class _MainPageState extends State<MainPage> {
                             AvatarPath.airForceAvatar,
                             fit: BoxFit.contain,
                           );
+                        default:
+                          return Container();
                       }
                     })(),
                   ),
                 ),
               ),
             ),
-
-            // 전역 프로그레스 바
             buildProgressBar(
               context,
               title: '전역',
-              progress: globalProgress,
+              progress: globalProgress / 10000000,
               endDate: dischargeDate != null
                   ? DateFormat('yyyy-MM-dd').format(dischargeDate!)
                   : '',
@@ -120,21 +179,18 @@ class _MainPageState extends State<MainPage> {
               topDateFontSize: 12,
               bottomPercentFontSize: 12,
               fullWidth: true,
-              bottomPadding: 0,
             ),
-
-            // 휴가 및 외출 프로그레스 바
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
+              padding: EdgeInsets.symmetric(vertical: 0),
               child: buildProgressBars(
                 context,
                 vacationTitle: '다음 휴가',
-                vacationProgress: vacationProgress,
+                vacationProgress: vacationProgress / 100000,
                 nextVacationDate: nextVacationDate != null
                     ? DateFormat('yyyy-MM-dd').format(nextVacationDate!)
                     : '-',
                 egressionTitle: '다음 외출',
-                egressionProgress: egressionProgress,
+                egressionProgress: egressionProgress / 100000,
                 nextEgressionDate: nextEgressionDate != null
                     ? DateFormat('yyyy-MM-dd').format(nextEgressionDate!)
                     : '-',
@@ -144,8 +200,6 @@ class _MainPageState extends State<MainPage> {
                 topPadding: 0,
               ),
             ),
-
-            // 일정 관련 Text
             Padding(
               padding: const EdgeInsets.all(20.0),
               child: Column(
@@ -163,19 +217,28 @@ class _MainPageState extends State<MainPage> {
                   buildInfoRow(
                       '현재 복무일',
                       dischargeDate != null && joinDate != null
-                          ? now.difference(joinDate!).inDays.toString()
+                          ? DateTime.now()
+                              .difference(joinDate!)
+                              .inDays
+                              .toString()
                           : ''),
                   buildLine(),
                   buildInfoRow(
                       '남은 복무일',
                       dischargeDate != null
-                          ? dischargeDate!.difference(now).inDays.toString()
+                          ? dischargeDate!
+                              .difference(DateTime.now())
+                              .inDays
+                              .toString()
                           : ''),
                   buildLine(),
                   buildInfoRow(
                       '다음 휴가까지',
                       nextVacationDate != null
-                          ? now.difference(nextVacationDate!).inDays.toString()
+                          ? nextVacationDate!
+                              .difference(DateTime.now())
+                              .inDays
+                              .toString()
                           : '-')
                 ],
               ),
@@ -200,48 +263,35 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
-  double _calculateProgress(DateTime startDate, DateTime endDate) {
-    // 현재 시간을 가져옴
+  int _calculateProgress(DateTime startDate, DateTime endDate, int dec) {
     DateTime now = DateTime.now();
-
-    // Calculating total duration in seconds
-    int totalDurationInSeconds = endDate.difference(startDate).inSeconds;
-
-    // Calculating the remaining duration in seconds
-    int remainingDurationInSeconds = endDate.difference(now).inSeconds;
-
-    // Calculating the progress
-    double progress = (totalDurationInSeconds - remainingDurationInSeconds) /
-        totalDurationInSeconds;
-
-    // Making sure progress is between 0 and 1
-    progress = progress.clamp(0.0, 1.0);
-
+    int totalDurationinSeconds = endDate.difference(startDate).inSeconds;
+    int remainingDurationinSeconds = endDate.difference(now).inSeconds;
+    int progress = ((totalDurationinSeconds - remainingDurationinSeconds) *
+            pow(10, dec + 2)) ~/
+        totalDurationinSeconds;
     return progress;
   }
 
-  void updateProgress() {
-    setState(() {
-      // 현재 시간을 가져옴
-      now = DateTime.now();
+  double _calculateRequireSecond(
+      DateTime startDate, DateTime endDate, int dec) {
+    return endDate.difference(startDate).inSeconds / pow(10, dec + 2);
+  }
 
-      // 전역 프로그레스 바 업데이트
-      globalProgress = (joinDate != null && dischargeDate != null)
-          ? _calculateProgress(joinDate!, dischargeDate!)
-          : 0;
-
-      // 휴가 및 외출 프로그레스 바 업데이트
-      vacationProgress = (preOutingDate != null &&
-              nextVacationDate != null &&
-              dischargeDate != null)
-          ? _calculateProgress(preOutingDate!, nextVacationDate!)
-          : 0;
-      egressionProgress = (preOutingDate != null &&
-              nextEgressionDate != null &&
-              dischargeDate != null)
-          ? _calculateProgress(preOutingDate!, nextEgressionDate!)
-          : 0;
-    });
+  void _setInitProgress() {
+    globalProgress = (joinDate != null && dischargeDate != null)
+        ? _calculateProgress(joinDate!, dischargeDate!, 7)
+        : 0;
+    vacationProgress = (preOutingDate != null &&
+            nextVacationDate != null &&
+            dischargeDate != null)
+        ? _calculateProgress(preOutingDate!, nextVacationDate!, 5)
+        : 0;
+    egressionProgress = (preOutingDate != null &&
+            nextEgressionDate != null &&
+            dischargeDate != null)
+        ? _calculateProgress(preOutingDate!, nextEgressionDate!, 5)
+        : 0;
   }
 
   Widget buildProgressBar(
@@ -253,16 +303,15 @@ class _MainPageState extends State<MainPage> {
     required double topDateFontSize,
     required double bottomPercentFontSize,
     bool fullWidth = false,
-    double bottomPadding = 10.0,
   }) {
     String formattedProgress = title == '전역'
-        ? (progress * 100).toStringAsFixed(7)
-        : (progress * 100).toStringAsFixed(5);
+        ? progress.toStringAsFixed(7)
+        : progress.toStringAsFixed(5);
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.125,
       color: Colors.white,
-      padding: EdgeInsets.only(left: 20, right: 20, bottom: bottomPadding),
+      padding: EdgeInsets.only(left: 20, right: 20, bottom: 0),
       child: Stack(
         alignment: Alignment.center,
         children: [
@@ -271,11 +320,10 @@ class _MainPageState extends State<MainPage> {
                 ? MediaQuery.of(context).size.width - 40
                 : (MediaQuery.of(context).size.width - 40) / 2,
             child: LinearPercentIndicator(
-              percent: progress,
-              lineHeight: 5,
-              backgroundColor: Colors.blueGrey.shade100,
-              progressColor: Colors.teal.shade400,
-            ),
+                percent: progress / 100,
+                lineHeight: title == '전역' ? 9 : 6,
+                backgroundColor: Colors.blueGrey.shade100,
+                progressColor: Color.fromARGB(255, 0, 27, 105)),
           ),
           Positioned(
             top: 25,
@@ -353,7 +401,6 @@ class _MainPageState extends State<MainPage> {
               titleFontSize: titleFontSize,
               topDateFontSize: topDateFontSize,
               bottomPercentFontSize: bottomPercentFontSize,
-              bottomPadding: 0,
             ),
           ),
           Expanded(
@@ -365,7 +412,6 @@ class _MainPageState extends State<MainPage> {
               titleFontSize: titleFontSize,
               topDateFontSize: topDateFontSize,
               bottomPercentFontSize: bottomPercentFontSize,
-              bottomPadding: 0,
             ),
           )
         ],
