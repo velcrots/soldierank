@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_ace/src/binding/init_bindings.dart';
 import 'package:get/get.dart';
 import 'package:flutter_ace/src/pages/login.dart';
-import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
 
 void main() async {

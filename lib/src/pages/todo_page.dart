@@ -6,7 +6,6 @@ void main() {
     home: TodoPage(),
   ));
 }
-
 class TodoPage extends StatefulWidget {
   @override
   _TodoPageState createState() => _TodoPageState();
@@ -15,12 +14,12 @@ class TodoPage extends StatefulWidget {
 class _TodoPageState extends State<TodoPage> {
   ToDoDatabase db = ToDoDatabase();  // 할 일 데이터베이스
   bool showCompletedTasksOnly = false;  // 완료된 할 일만 보여주는지 여부
-  final _taskController = TextEditingController();  // 새로운 할 일 입력을 위한 컨트롤러
+  final _taskController = TextEditingController();
+  final _taskController2 = TextEditingController();// 새로운 할 일 입력을 위한 컨트롤러
 
   @override
   void initState() {
     super.initState();
-    // Start the timer to update the UI every 1 second (60 times per second)
     db.loadData();  // 화면 로드 시 데이터베이스에서 할 일 데이터를 가져옴
     if (db.toDoList.isEmpty) {  // 로드된 데이터가 없다면
       db.createInitialData();  // 초기 데이터 생성
@@ -47,7 +46,9 @@ class _TodoPageState extends State<TodoPage> {
       ),
 
       // 교안의 Filtered List View를 사용하여 Todo List 표시
-      body: ListView.builder(
+      body:
+
+      ListView.builder(
         itemCount: showCompletedTasksOnly  // 완료된 할 일만 보여줄지 여부에 따라 목록 길이 결정
             ? db.toDoList.where((task) => task.isCompleted).length
             : db.toDoList.length,
@@ -63,12 +64,16 @@ class _TodoPageState extends State<TodoPage> {
                 db.updateDataBase();  // 변경된 데이터를 데이터베이스에 업데이트
               });
             },
+            addTask: () {
+              onPressed: _addTask;
+            },
             onDelete: () {
               setState(() {
                 db.toDoList.remove(task);  // 할 일 목록에서 해당 아이템 삭제
                 db.updateDataBase();  // 변경된 데이터를 데이터베이스에 업데이트
               });
             },
+
           );
         },
       ),
@@ -99,7 +104,7 @@ class _TodoPageState extends State<TodoPage> {
         onCancel: () {
           _taskController.clear();  // 입력 필드 초기화
           Navigator.of(context).pop();  // 다이얼로그 닫기
-        },
+        }, standard: _taskController2,
       ),
     );
   }
@@ -127,8 +132,8 @@ class ToDoDatabase {
   /// 초기 데이터 생성
   void createInitialData() {
     toDoList = [
-      ToDoItem(name: "운동 1시간", isCompleted: false),
-      ToDoItem(name: "밥먹기", isCompleted: false),
+      ToDoItem(name: "운동 하기", isCompleted: false),
+      ToDoItem(name: "책 읽기", isCompleted: false),
       ToDoItem(name: "빨래하기", isCompleted: false),
     ];
   }
@@ -165,18 +170,19 @@ class CustomButton extends StatelessWidget {
 }
 
 class AddTaskDialog extends StatelessWidget {
-  final TextEditingController controller;  // 입력한 텍스트를 관리하는 컨트롤러
+  final TextEditingController controller;
+  final TextEditingController standard;// 입력한 텍스트를 관리하는 컨트롤러
   final VoidCallback onSave;  // 저장 버튼 클릭 시 실행될 함수
   final VoidCallback onCancel;  // 취소 버튼 클릭 시 실행될 함수
 
-  const AddTaskDialog({super.key, required this.controller, required this.onSave, required this.onCancel});
+  const AddTaskDialog({super.key, required this.controller, required this.standard, required this.onSave, required this.onCancel});
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
       backgroundColor: Colors.teal[400],
       content: SizedBox(
-        height: 120,
+        height: 180,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
@@ -185,6 +191,13 @@ class AddTaskDialog extends StatelessWidget {
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 hintText: "새로운 할 일 추가",
+              ),
+            ),
+            TextField(
+              controller: standard,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                hintText: "목표 완료 달성 기준",
               ),
             ),
             Row(
@@ -207,18 +220,19 @@ class ToDoItemWidget extends StatelessWidget {
   final ToDoItem item;  // 할 일 아이템 정보
   final ValueChanged<bool?> onChanged;  // 체크박스 변경 시 실행될 함수
   final VoidCallback onDelete;  // 삭제 버튼 클릭 시 실행될 함수
+  final VoidCallback addTask;
 
-  const ToDoItemWidget({super.key, required this.item, required this.onChanged, required this.onDelete});
+  const ToDoItemWidget({super.key, required this.item, required this.onChanged, required this.addTask, required this.onDelete});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 25.0, vertical: 25),
+      padding: const EdgeInsets.symmetric(horizontal: 25.0, vertical: 5),
       child: Container(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(15),
         decoration: BoxDecoration(
           color: Colors.teal[400],
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(5),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -241,11 +255,18 @@ class ToDoItemWidget extends StatelessWidget {
                 ),
               ],
             ),
-            // ListTile에 삭제 버튼 추가
-            IconButton(
-              icon: const Icon(Icons.delete, color: Colors.red),  // 삭제 아이콘
-              onPressed: onDelete,
-            )
+            Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.edit, color: Colors.white30),  // 편집 아이콘
+                    onPressed: addTask,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline_sharp, color: Colors.white30),  // 삭제 아이콘
+                    onPressed: onDelete,
+                  )
+                ]
+            ),
           ],
         ),
       ),
