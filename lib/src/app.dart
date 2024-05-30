@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_ace/src/components/image_data.dart';
 import 'package:flutter_ace/src/controller/bottom_nav_controller.dart';
 import 'package:flutter_ace/src/pages/assessment_page.dart';
+import 'package:flutter_ace/src/pages/group_page.dart';
 import 'package:flutter_ace/src/pages/main_page.dart';
 import 'package:flutter_ace/src/pages/todo_page.dart';
 import 'package:flutter_ace/src/pages/trainig_page.dart';
@@ -45,9 +46,7 @@ class App extends GetView<BottomNavController> {
                 AssessmentPage(),
                 TrainingPage(),
                 TodoPage(),
-                Container(
-                  child: Center(child: Text('home4')),
-                ),
+                GroupPage(),
                 Container(
                   child: Center(child: Text('home5')),
                 ),
