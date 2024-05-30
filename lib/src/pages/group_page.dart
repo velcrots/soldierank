@@ -32,13 +32,27 @@ class _GroupPageState extends State<GroupPage> {
             trailing: Icon(Icons.arrow_forward),
             selected: index < 3,
             onTap: () {
-              print('Tapped on item $index');
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: Text(items[index]),
+                    content: Text('${items[index]} 관련 정보',),
+                    actions: [
+                      TextButton(
+                        child: Text('Close'),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
             },
           );
         },
       ),
-
-
     );
   }
 }
