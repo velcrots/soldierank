@@ -31,17 +31,58 @@ class _GroupPageState extends State<GroupPage> {
       ),
       backgroundColor: Colors.white,
       body: ListView.builder(
-        itemCount: db.userList.length,
+        itemCount: db.userList.length+1+1,
         itemBuilder: (context, index) {
-          return index == 0 ?
-            Padding(
+          int dbIndex = index-1-1;
+          if (index == 0) {
+            return Padding(
               padding: EdgeInsets.all(20),
-              child: Text('멤버 ${db.userList.length-1}명', textAlign: TextAlign.right,)  // 멤버 수
-            ) :
-            ListTile(
-              leading: db.getImage(index),  // 사용자 이미지
-              title: db.getName(index),  // 사용자 이름
-              subtitle: db.getMessage(index),  // 사용자 상태메시지
+              child: Text('멤버 ${db.userList.length}명', textAlign: TextAlign.right,)  // 멤버 수
+            );
+          } if (index == 1) {
+            return TextButton(  // 초대 버튼
+              child: Text('초대하기'),
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return StatefulBuilder(
+                        builder: (context, setState) {
+                          return AlertDialog(
+                            title: Text('초대하기'),
+                            content: Text('초대하기'),
+                            actions: [
+                              TextField(
+                                //controller: idController,
+                                autofocus: true,
+                                decoration: decoTheme('군번', '군번 (- 없이 입력하세요)'),
+                                keyboardType: TextInputType.number,
+                              ),
+                              TextButton(
+                                child: Text('초대하기'),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                              TextButton(
+                                child: Text('Close'),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                            ],
+                          );
+                        }
+                    );
+                  },
+                );
+              },
+            );
+          } else {
+            return ListTile(
+              leading: db.getImage(dbIndex),  // 사용자 이미지
+              title: db.getName(dbIndex),  // 사용자 이름
+              subtitle: db.getMessage(dbIndex),  // 사용자 상태메시지
               trailing: Icon(Icons.arrow_forward),
               onTap: () {
                 showDialog(
@@ -50,14 +91,14 @@ class _GroupPageState extends State<GroupPage> {
                     return StatefulBuilder(
                       builder: (context, setState) {
                         return AlertDialog(
-                          title: db.getName(index),
-                          content: db.getInfo(index),
+                          title: db.getName(dbIndex),
+                          content: db.getInfo(dbIndex),
                           actions: [
                             TextButton(  // 점수 올리기 버튼
                               child: Icon(Icons.arrow_upward),
                               onPressed: () {
                                 setState(() {
-                                  db.upScore(index);
+                                  db.upScore(dbIndex);
                                 });
                               },
                           ),
@@ -65,7 +106,7 @@ class _GroupPageState extends State<GroupPage> {
                               child: Icon(Icons.arrow_downward),
                               onPressed: () {
                                 setState(() {
-                                  db.downScore(index);
+                                  db.downScore(dbIndex);
                                 });
                               },
                             ),
@@ -83,6 +124,7 @@ class _GroupPageState extends State<GroupPage> {
               );
             },
           );
+          }
         },
       ),
     );
@@ -117,7 +159,6 @@ class UserDatabase {
   /// 초기 데이터 생성
   void createInitialData() {
     userList = [
-      UserItem(name: "", message: '', info: '관련 정보'),
       UserItem(name: "이름", message: '상태메시지', info: '관련 정보'),
       UserItem(name: "이름", message: '상태메시지', info: '관련 정보'),
       UserItem(name: "이름", message: '상태메시지', info: '관련 정보'),
@@ -177,4 +218,27 @@ class UserDatabase {
   void updateDataBase() {
     _myBox.put("USERLIST", userList.map((e) => e.toMap()).toList());  // 'USERLIST' 키에 리스트 데이터 저장
   }
+}
+
+
+
+
+InputDecoration decoTheme(title, placeholder) {
+  InputDecoration deco = InputDecoration(
+    labelText: title,
+    hintText: placeholder,
+    labelStyle: TextStyle(color: Colors.grey),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+      borderSide: BorderSide(width: 1, color: Colors.grey),
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+      borderSide: BorderSide(width: 1, color: Colors.grey),
+    ),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+    ),
+  );
+  return deco;
 }
