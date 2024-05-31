@@ -12,6 +12,7 @@ class GroupPage extends StatefulWidget {
 
 class _GroupPageState extends State<GroupPage> {
 
+  int listSize = 19;
   final List<String> items =
   List<String>.generate(20, (index) => "병사 $index");
   
@@ -25,25 +26,29 @@ class _GroupPageState extends State<GroupPage> {
       body: ListView.builder(
         itemCount: items.length,
         itemBuilder: (context, index) {
-          return ListTile(
-            leading: Icon(Icons.account_circle),
-            title: Text(items[index]),
-            subtitle: Text('상태메시지 $index'),
-            trailing: Icon(Icons.arrow_forward),
-            selected: index < 3,
-            onTap: () {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: Text(items[index]),
-                    content: Text('${items[index]} 관련 정보',),
-                    actions: [
-                      TextButton(
-                        child: Text('Close'),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
+          return index == 0 ?
+            Padding(
+              padding: EdgeInsets.all(20),
+              child: Text('멤버 $listSize명', textAlign: TextAlign.right,)
+            ) :
+            ListTile(
+              leading: Icon(Icons.account_circle),
+              title: Text(items[index]),
+              subtitle: Text('상태메시지 $index'),
+              trailing: Icon(Icons.arrow_forward),
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text(items[index]),
+                      content: Text('${items[index]} 관련 정보',),
+                      actions: [
+                        TextButton(
+                          child: Text('Close'),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
                       ),
                     ],
                   );
