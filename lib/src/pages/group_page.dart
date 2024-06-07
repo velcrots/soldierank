@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_ace/src/components/image_data.dart';
+import 'package:flutter_ace/widgets/input_deco.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 class GroupPage extends StatefulWidget {
@@ -55,7 +56,7 @@ class _GroupPageState extends State<GroupPage> {
                               TextField(
                                 //controller: idController,
                                 autofocus: true,
-                                decoration: decoTheme('군번', '군번 (- 없이 입력하세요)'),
+                                decoration: InputDeco(labelText: '군번', hintText: '군번 (- 없이 입력하세요)'),
                                 keyboardType: TextInputType.number,
                               ),
                               TextButton(
@@ -218,27 +219,4 @@ class UserDatabase {
   void updateDataBase() {
     _myBox.put("USERLIST", userList.map((e) => e.toMap()).toList());  // 'USERLIST' 키에 리스트 데이터 저장
   }
-}
-
-
-
-
-InputDecoration decoTheme(title, placeholder) {
-  InputDecoration deco = InputDecoration(
-    labelText: title,
-    hintText: placeholder,
-    labelStyle: TextStyle(color: Colors.grey),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.all(Radius.circular(10.0)),
-      borderSide: BorderSide(width: 1, color: Colors.grey),
-    ),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.all(Radius.circular(10.0)),
-      borderSide: BorderSide(width: 1, color: Colors.grey),
-    ),
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.all(Radius.circular(10.0)),
-    ),
-  );
-  return deco;
 }

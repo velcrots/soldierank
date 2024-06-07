@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import '../../widgets/input_deco.dart';
 import '../app.dart';
 import './register.dart';
 
@@ -63,7 +64,7 @@ class _LoginState extends State<Login> {
                           TextField(
                             controller: idController,
                             autofocus: true,
-                            decoration: decoTheme('군번', '군번 (- 없이 입력하세요)'),
+                            decoration: InputDeco(labelText: '군번', hintText: '군번 (- 없이 입력하세요)'),
                             keyboardType: TextInputType.number,
                           ),
 
@@ -74,7 +75,7 @@ class _LoginState extends State<Login> {
                           // 비밀번호 입력 필드
                           TextField(
                             controller: pwdController,
-                            decoration: decoTheme('비밀번호', '비밀번호'),
+                            decoration: InputDeco(labelText: '비밀번호', hintText: '비밀번호'),
                             keyboardType: TextInputType.text,
                             obscureText: true,
                           ),
@@ -186,23 +187,3 @@ class RegisterPage extends StatelessWidget {
   }
 }
 
-
-InputDecoration decoTheme(title, placeholder) {
-  InputDecoration deco = InputDecoration(
-    labelText: title,
-    hintText: placeholder,
-    labelStyle: TextStyle(color: Colors.grey),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.all(Radius.circular(10.0)),
-      borderSide: BorderSide(width: 1, color: Colors.grey),
-    ),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.all(Radius.circular(10.0)),
-      borderSide: BorderSide(width: 1, color: Colors.grey),
-    ),
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.all(Radius.circular(10.0)),
-    ),
-  );
-  return deco;
-}
