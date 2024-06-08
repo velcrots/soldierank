@@ -12,6 +12,9 @@ class ToDoDatabase {
       ToDoModel(name: "밥먹기", isCompleted: false),
       ToDoModel(name: "빨래하기", isCompleted: false),
     ];
+    addDataBase(toDoList[0]);
+    addDataBase(toDoList[1]);
+    addDataBase(toDoList[2]);
   }
 
   Future<void> loadData() async {
@@ -22,19 +25,30 @@ class ToDoDatabase {
     });
   }
 
-  /// 데이터베이스 업데이트
-  Future<void> updateDataBase() async {
-    await ToDoAPIService().todoAdd(App.userId).then((val) {
-      toDoList = val;
+  /// 투두 추가
+  Future<void> addDataBase(toDo) async {
+    await ToDoAPIService().todoAdd(App.userId, toDo).then((val) {
+      toDo.id = val;
     }).catchError((error) {
-      print('todo database error: $error');
+      print('todoAdd database error: $error');
     });
-    // ProfileAPIService api = ProfileAPIService();
-    // var future = api.todoUpdate(userId);
-    // future.then((val) {
-    //   userList = val;
-    // }).catchError((error) {
-    //   print('error: $error');
-    // });
+  }
+
+  /// 투두 업데이트
+  Future<void> updateDataBase(toDo) async {
+    await ToDoAPIService().todoUpdate(App.userId, toDo).then((val) {
+      //
+    }).catchError((error) {
+      print('todoUpdate database error: $error');
+    });
+  }
+
+  /// 투두 삭제
+  Future<void> deleteDataBase(toDo) async {
+    await ToDoAPIService().todoDelete(App.userId, toDo).then((val) {
+      //
+    }).catchError((error) {
+      print('todoDelete database error: $error');
+    });
   }
 }

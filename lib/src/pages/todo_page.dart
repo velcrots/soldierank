@@ -26,7 +26,6 @@ class _TodoPageState extends State<TodoPage> {
     db.loadData().then((a) {  // 화면 로드 시 데이터베이스에서 데이터를 가져옴
       if (db.toDoList.isEmpty) {  // 로드된 데이터가 없다면
         db.createInitialData();  // 초기 데이터 생성
-        db.updateDataBase();  // 생성된 초기 데이터를 데이터베이스에 저장
       }
     }).catchError((error) {
       print('todo initState error: $error');
@@ -65,13 +64,13 @@ class _TodoPageState extends State<TodoPage> {
             onChanged: (value) {
               setState(() {
                 task.isCompleted = value!;
-                db.updateDataBase();  // 변경된 데이터를 데이터베이스에 업데이트
+                db.updateDataBase(task);  // 변경된 데이터를 데이터베이스에 업데이트
               });
             },
             onDelete: () {
               setState(() {
                 db.toDoList.remove(task);  // 할 일 목록에서 해당 아이템 삭제
-                db.updateDataBase();  // 변경된 데이터를 데이터베이스에 업데이트
+                db.deleteDataBase(task);  // 변경된 데이터를 데이터베이스에 업데이트
               });
             },
           );
@@ -96,7 +95,7 @@ class _TodoPageState extends State<TodoPage> {
           setState(() {
             var newTask = ToDoModel(name: _taskController.text);  // 입력한 텍스트를 기반으로 새로운 할 일 생성
             db.toDoList.add(newTask);  // 할 일 목록에 새로운 아이템 추가
-            db.updateDataBase();  // 변경된 데이터를 데이터베이스에 업데이트
+            db.addDataBase(newTask);  // 변경된 데이터를 데이터베이스에 업데이트
             _taskController.clear();  // 입력 필드 초기화
           });
           Navigator.of(context).pop();  // 다이얼로그 닫기
