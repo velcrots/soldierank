@@ -1,5 +1,6 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_ace/routes.dart';
+import 'package:flutter_ace/services/web_api/api.dart';
 import '../../widgets/input_deco.dart';
 import '../app.dart';
 import './register.dart';
@@ -17,15 +18,6 @@ class _LoginState extends State<Login> {
 
   double loginMessageEnable = 0.0;
   String loginMessage = "";
-
-  Future<int> _callAPI(String idText, String pwdText) async {
-    var url = Uri.parse(
-      'http://navy-combat-power-management-platform.shop/get.php',
-    );
-    var response = await Dio().postUri(url, data: {'username': idText, 'pwd': pwdText});
-    return response.data;
-  }
-
 
   @override
   Widget build(BuildContext context) {
@@ -93,14 +85,9 @@ class _LoginState extends State<Login> {
                           ButtonTheme(
                               child: ElevatedButton(
                                 onPressed: () {
-                                  Future<int> future = _callAPI(idController.text, pwdController.text);
-                                  future.then((val) {
+                                  ProfileAPIService().login(idController.text, pwdController.text).then((val) {
                                     if (val == 1) {
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (BuildContext context) =>
-                                                  MainPage(idController.text)));
+                                      Navigator.of(context).pushNamed(Routes.app, arguments: idController.text); //idController.text
                                       loginMessageEnable = 0.0;
                                     } else {
                                       setState(() {setMessage('군번 또는 비밀번호를 잘못 입력했습니다. \n입력하신 내용을 다시 확인해주세요.');});
@@ -130,11 +117,7 @@ class _LoginState extends State<Login> {
                               height: 50.0,
                               child: ElevatedButton(
                                 onPressed: () {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (BuildContext context) =>
-                                              RegisterPage()));
+                                  Navigator.of(context).pushNamed(Routes.register);
                                 },
                                 style: ElevatedButton.styleFrom(
                                     shape: RoundedRectangleBorder(
@@ -167,23 +150,3 @@ void showSnackBar(BuildContext context, Text text) {
 
   ScaffoldMessenger.of(context).showSnackBar(snackBar);
 }
-
-class MainPage extends StatelessWidget {
-  String userId = '';
-  MainPage(this.userId, {Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return App(userId);
-  }
-}
-
-class RegisterPage extends StatelessWidget {
-  const RegisterPage({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Register();
-  }
-}
-

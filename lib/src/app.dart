@@ -10,11 +10,12 @@ import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:get/get_state_manager/src/simple/get_view.dart';
 
 class App extends GetView<BottomNavController> {
-  String userId = '';
-  App(this.userId, {Key? key}) : super(key: key);
+  App({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final userId = (ModalRoute.of(context)?.settings.arguments ?? '') as String;
+    print('dsa: ${userId}');
     return WillPopScope(
         onWillPop: controller.willPopAction,
         child: Obx(

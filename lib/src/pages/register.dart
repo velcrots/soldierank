@@ -1,5 +1,5 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_ace/services/web_api/api.dart';
 import 'package:flutter_ace/widgets/input_deco.dart';
 import 'package:intl/intl.dart';
 
@@ -44,14 +44,6 @@ class _RegisterState extends State<Register> {
   bool validPwd = false;
   bool validJoin = false;
   bool validDischarge = false;
-
-  Future<bool> _callAPI(name, birth, id, pwd, join, discharge, soldierType, pos, isCheck) async {
-    var url = Uri.parse(
-      'http://navy-combat-power-management-platform.shop/register.php',
-    );
-    var response = await Dio().postUri(url, data: {'name': name, 'birth': birth, 'id': id, 'pwd': pwd, 'join': join, 'discharge': discharge, 'soldierType': soldierType, 'pos': pos, 'isCheck': isCheck ? 1 : 0});
-    return response.data;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -342,9 +334,16 @@ class _RegisterState extends State<Register> {
                                       validPwd &&
                                       validJoin &&
                                       validDischarge) {
-                                    Future<bool> future = _callAPI(
-                                        nameController.text, birthController.text, idController.text, pwdController.text, joinController.text, dischargeController.text, soldierType, posController.text, isCheck);
-                                    future.then((val) {
+                                    ProfileAPIService().register(
+                                        nameController.text,
+                                        birthController.text,
+                                        idController.text,
+                                        pwdController.text,
+                                        joinController.text,
+                                        dischargeController.text,
+                                        soldierType,
+                                        posController.text,
+                                        isCheck).then((val) {
                                       if(val){
                                         Navigator.pop(context, true);
                                         showSnackBar(context, Text('가입 완료'));

@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_ace/services/database/main_user_database.dart';
 import 'package:flutter_ace/src/components/image_data.dart';
+import 'package:get/get.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:intl/intl.dart';
 
@@ -16,6 +18,8 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
+  MainUserDatabase db = MainUserDatabase();  // 사용자 데이터베이스
+
   late Timer _globalTimer;
   late Timer _vacationTimer;
   late Timer _egressionTimer;
@@ -37,7 +41,14 @@ class _MainPageState extends State<MainPage> {
   void initState() {
     super.initState();
     format = DateFormat('yyyy-MM-dd HH:mm:ss');
-    _fetchUserData();
+    db.loadData(widget.userId).then((a) {  // 화면 로드 시 데이터베이스에서 데이터를 가져옴
+      if (db.user == null) {  // 로드된 데이터가 없다면
+        db.createInitialData();  // 초기 데이터 생성
+      }
+      _fetchUserData();
+    }).catchError((error) {
+      print('main initState error: $error');
+    });
   }
 
   @override
@@ -48,17 +59,15 @@ class _MainPageState extends State<MainPage> {
     super.dispose();
   }
 
-  Future<void> _fetchUserData() async {
+  void _fetchUserData() {
     try {
-      final result = await _callAPI(widget.userId);
       setState(() {
-        soldierType = result['사용자'][0]['군별'];
-        joinDate = _parseDate(result['사용자'][0]['입대일'] ?? '');
-        dischargeDate =
-            _parseDate(result['사용자'][0]['전역일'] ?? '').add(Duration(days: 1));
-        preOutingDate = _parseDate(result['사용자'][0]['최근_복귀일'] ?? '');
-        nextVacationDate = _parseDate(result['휴가'][0]['출발_날짜'] ?? '');
-        nextEgressionDate = _parseDate(result['외출'][0]['출발_날짜'] ?? '');
+        soldierType = db.user!.soldierType;
+        joinDate = db.user!.joinDate;
+        dischargeDate = db.user!.dischargeDate;
+        preOutingDate = db.user!.preOutingDate;
+        nextVacationDate = db.user!.nextVacationDate;
+        nextEgressionDate = db.user!.nextEgressionDate;
 
         if (joinDate != null && dischargeDate != null) {
           requireSecondGL =
@@ -80,13 +89,6 @@ class _MainPageState extends State<MainPage> {
     } catch (error) {
       print('Error fetching user data: $error');
     }
-  }
-
-  Future<Map<String, dynamic>> _callAPI(String idText) async {
-    final url = Uri.parse(
-        'http://navy-combat-power-management-platform.shop/getInfo.php');
-    final response = await Dio().postUri(url, data: {'username': idText});
-    return response.data;
   }
 
   // TODO : 정확도 이슈 해결
