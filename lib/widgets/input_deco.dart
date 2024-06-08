@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+/// TextField의 decoration 값
 class InputDeco extends InputDecoration{
   const InputDeco({
     super.labelText,

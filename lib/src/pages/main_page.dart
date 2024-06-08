@@ -1,18 +1,12 @@
 import 'dart:async';
 import 'dart:math';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_ace/services/database/main_user_database.dart';
 import 'package:flutter_ace/src/components/image_data.dart';
-import 'package:get/get.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:intl/intl.dart';
 
 class MainPage extends StatefulWidget {
-  final String userId;
-
-  const MainPage(this.userId, {super.key});
-
   @override
   State<MainPage> createState() => _MainPageState();
 }
@@ -41,11 +35,11 @@ class _MainPageState extends State<MainPage> {
   void initState() {
     super.initState();
     format = DateFormat('yyyy-MM-dd HH:mm:ss');
-    db.loadData(widget.userId).then((a) {  // 화면 로드 시 데이터베이스에서 데이터를 가져옴
+    db.loadData().then((a) {  // 화면 로드 시 데이터베이스에서 데이터를 가져옴
       if (db.user == null) {  // 로드된 데이터가 없다면
         db.createInitialData();  // 초기 데이터 생성
       }
-      _fetchUserData();
+      _fetchUserData();  // 데이터 가져오기가 완료되면 함수 실행
     }).catchError((error) {
       print('main initState error: $error');
     });

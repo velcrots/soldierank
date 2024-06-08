@@ -1,7 +1,6 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_ace/models/group_user_model.dart';
-import 'package:flutter_ace/services/web_api/api.dart';
+import 'package:flutter_ace/services/web_api/group_api.dart';
 
 class GroupUserDatabase {
   /// 사용자 목록을 저장하는 리스트
@@ -54,9 +53,7 @@ class GroupUserDatabase {
 
   /// 데이터베이스 불러오기
   void loadData() {
-    ProfileAPIService api = ProfileAPIService();
-    var future = api.group('1234567890');
-    future.then((val) {
+    GroupAPIService().group('1234567890').then((val) {
       userList = val;
     }).catchError((error) {
       print('group user database error: $error');

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_ace/services/web_api/api.dart';
+import 'package:flutter_ace/services/web_api/sign_api.dart';
 import 'package:flutter_ace/widgets/input_deco.dart';
 import 'package:intl/intl.dart';
 
@@ -334,7 +334,7 @@ class _RegisterState extends State<Register> {
                                       validPwd &&
                                       validJoin &&
                                       validDischarge) {
-                                    ProfileAPIService().register(
+                                    SignAPIService().register(
                                         nameController.text,
                                         birthController.text,
                                         idController.text,

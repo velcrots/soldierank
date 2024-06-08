@@ -1,8 +1,7 @@
 
-import 'package:flutter/material.dart';
-import 'package:flutter_ace/models/group_user_model.dart';
 import 'package:flutter_ace/models/main_user_model.dart';
-import 'package:flutter_ace/services/web_api/api.dart';
+import 'package:flutter_ace/services/web_api/main_api.dart';
+import 'package:flutter_ace/src/app.dart';
 import 'package:intl/intl.dart';
 
 class MainUserDatabase {
@@ -25,8 +24,8 @@ class MainUserDatabase {
 
 
   /// 데이터베이스 불러오기
-  Future<void> loadData(userId) async {
-    await ProfileAPIService().main(userId).then((val) {
+  Future<void> loadData() async {
+    await MainAPIService().main(App.userId).then((val) {
       user = val;
     }).catchError((error) {
       print('main user database error: $error');

@@ -12,10 +12,12 @@ import 'package:get/get_state_manager/src/simple/get_view.dart';
 class App extends GetView<BottomNavController> {
   App({Key? key}) : super(key: key);
 
+  static const String defalutId = '1234567890';
+  static String userId = defalutId;
+
   @override
   Widget build(BuildContext context) {
-    final userId = (ModalRoute.of(context)?.settings.arguments ?? '') as String;
-    print('dsa: ${userId}');
+    userId = (ModalRoute.of(context)?.settings.arguments ?? defalutId) as String;
     return WillPopScope(
         onWillPop: controller.willPopAction,
         child: Obx(
@@ -43,7 +45,7 @@ class App extends GetView<BottomNavController> {
             body: IndexedStack(
               index: controller.pageIndex.value,
               children: [
-                MainPage(userId),
+                MainPage(),
                 AssessmentPage(),
                 TrainingPage(),
                 TodoPage(),
