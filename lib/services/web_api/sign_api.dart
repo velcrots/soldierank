@@ -18,7 +18,17 @@ class SignAPIService {
   Future<bool> register(name, birth, id, pwd, join, discharge, soldierType, pos, isCheck) async {
     try {
       var url = Uri.parse(APIPath.register);
-      var response = await Dio().postUri(url, data: {'name': name, 'birth': birth, 'id': id, 'pwd': pwd, 'join': join, 'discharge': discharge, 'soldierType': soldierType, 'pos': pos, 'isCheck': isCheck ? 1 : 0});
+      var response = await Dio().postUri(url, data: {
+        'name': name,
+        'birth': birth,
+        'id': id,
+        'pwd': pwd,
+        'join': join,
+        'discharge': discharge,
+        'soldierType': soldierType,
+        'pos': pos,
+        'isCheck': isCheck ? 1 : 0
+      });
       return response.data;
     } on Exception catch (error) {
       print('register api error: $error');

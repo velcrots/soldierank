@@ -18,13 +18,6 @@ class _TrainingPageState extends State<TrainingPage> {
     'https://www.shutterstock.com/shutterstock/videos/4836392/preview/stock-footage--s-the-korean-war-rages-on-and-army-combat-teams-engage-in-battle-with-a-wide-variety-of.webm',
     'https://www.shutterstock.com/shutterstock/videos/4397513/preview/stock-footage--s-unedited-raw-silent-footage-of-the-tet-offensive-attack-on-the-tan-son-nhut-airbase.webm',
   ];
-  Future<int> _callAPI(String idText, String pwdText) async {
-    var url = Uri.parse(
-      'http://navy-combat-power-management-platform.shop/get.php',
-    );
-    var response = await Dio().postUri(url, data: {'username': idText, 'pwd': pwdText});
-    return response.data;
-  }
 
   late VideoPlayerController _controller;
   double? aspectRatio;
