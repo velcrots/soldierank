@@ -1,5 +1,6 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_ace/services/web_api/sign_api.dart';
+import 'package:flutter_ace/widgets/input_deco.dart';
 import 'package:intl/intl.dart';
 
 class Register extends StatefulWidget {
@@ -44,14 +45,6 @@ class _RegisterState extends State<Register> {
   bool validJoin = false;
   bool validDischarge = false;
 
-  Future<bool> _callAPI(name, birth, id, pwd, join, discharge, soldierType, pos, isCheck) async {
-    var url = Uri.parse(
-      'http://navy-combat-power-management-platform.shop/register.php',
-    );
-    var response = await Dio().postUri(url, data: {'name': name, 'birth': birth, 'id': id, 'pwd': pwd, 'join': join, 'discharge': discharge, 'soldierType': soldierType, 'pos': pos, 'isCheck': isCheck ? 1 : 0});
-    return response.data;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -93,7 +86,7 @@ class _RegisterState extends State<Register> {
                                 flex: 1,
                                 child: TextField(
                                   controller: nameController,
-                                  decoration: decoTheme('이름', '이름'),
+                                  decoration: InputDeco(labelText: '이름', hintText: '이름'),
                                   keyboardType: TextInputType.text,
                                   onChanged: (text) {setNameMessage(text);}
                                 )),
@@ -107,7 +100,7 @@ class _RegisterState extends State<Register> {
                                 flex: 1,
                                 child: TextField(
                                   controller: birthController,
-                                  decoration: decoTheme('생년월일', '생년월일 8자리'),
+                                  decoration: InputDeco(labelText: '생년월일', hintText: '생년월일 8자리'),
                                   keyboardType: TextInputType.number,
                                   onChanged: (text) {setBirthMessage(text);}
                                 )),
@@ -139,7 +132,7 @@ class _RegisterState extends State<Register> {
                           // 군번 입력 필드
                           TextField(
                             controller: idController,
-                            decoration: decoTheme('군번', '군번 (- 없이 입력하세요)'),
+                            decoration: InputDeco(labelText: '군번', hintText: '군번 (- 없이 입력하세요)'),
                             keyboardType: TextInputType.number,
                             onChanged: (text) {setIdMessage(text);}
                           ),
@@ -158,7 +151,7 @@ class _RegisterState extends State<Register> {
                           // 비밀번호 입력 필드
                           TextField(
                             controller: pwdController,
-                            decoration: decoTheme('비밀번호', '비밀번호'),
+                            decoration: InputDeco(labelText: '비밀번호', hintText: '비밀번호'),
                             keyboardType: TextInputType.text,
                             obscureText: true,
                             onChanged: (text) {setPwdMessage(text);}
@@ -183,7 +176,7 @@ class _RegisterState extends State<Register> {
                                 flex: 5,
                                 child: TextField(
                                   controller: joinController,
-                                  decoration: decoTheme('입대일', '입대일'),
+                                  decoration: InputDeco(labelText: '입대일', hintText: '입대일'),
                                   keyboardType: TextInputType.number,
                                   onChanged: (text) {setJoinMessage(text);}
                                 )),
@@ -221,7 +214,7 @@ class _RegisterState extends State<Register> {
                                 flex: 5,
                                 child: TextField(
                                   controller: dischargeController,
-                                  decoration: decoTheme('전역일', '전역일'),
+                                  decoration: InputDeco(labelText: '전역일', hintText: '전역일'),
                                   keyboardType: TextInputType.number,
                                   onChanged: (text) {setDischargeMessage(text);}
                                 )),
@@ -303,7 +296,7 @@ class _RegisterState extends State<Register> {
                                 flex: 5,
                                 child: TextField(
                                   controller: posController,
-                                  decoration: decoTheme('직별', '직별'),
+                                  decoration: InputDeco(labelText: '직별', hintText: '직별'),
                                   keyboardType: TextInputType.text,
                                 )),
                           ]),
@@ -341,9 +334,16 @@ class _RegisterState extends State<Register> {
                                       validPwd &&
                                       validJoin &&
                                       validDischarge) {
-                                    Future<bool> future = _callAPI(
-                                        nameController.text, birthController.text, idController.text, pwdController.text, joinController.text, dischargeController.text, soldierType, posController.text, isCheck);
-                                    future.then((val) {
+                                    SignAPIService().register(
+                                        nameController.text,
+                                        birthController.text,
+                                        idController.text,
+                                        pwdController.text,
+                                        joinController.text,
+                                        dischargeController.text,
+                                        soldierType,
+                                        posController.text,
+                                        isCheck).then((val) {
                                       if(val){
                                         Navigator.pop(context, true);
                                         showSnackBar(context, Text('가입 완료'));
@@ -484,24 +484,4 @@ void showSnackBar(BuildContext context, Text text) {
   );
 
   ScaffoldMessenger.of(context).showSnackBar(snackBar);
-}
-
-InputDecoration decoTheme(title, placeholder) {
-  InputDecoration deco = InputDecoration(
-    labelText: title,
-    hintText: placeholder,
-    labelStyle: TextStyle(color: Colors.grey),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.all(Radius.circular(10.0)),
-      borderSide: BorderSide(width: 1, color: Colors.grey),
-    ),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.all(Radius.circular(10.0)),
-      borderSide: BorderSide(width: 1, color: Colors.grey),
-    ),
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.all(Radius.circular(10.0)),
-    ),
-  );
-  return deco;
 }

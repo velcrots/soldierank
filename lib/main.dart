@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_ace/routes.dart';
 import 'package:flutter_ace/src/binding/init_bindings.dart';
 import 'package:get/get.dart';
 import 'package:flutter_ace/src/pages/login.dart';
@@ -19,6 +20,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       title: 'Flutter Demo',
+      routes: Routes.routes,
       theme: ThemeData(
           primarySwatch: Colors.blue,
           appBarTheme: const AppBarTheme(

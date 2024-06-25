@@ -1,7 +1,7 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import '../app.dart';
-import './register.dart';
+import 'package:flutter_ace/routes.dart';
+import 'package:flutter_ace/services/web_api/sign_api.dart';
+import 'package:flutter_ace/widgets/input_deco.dart';
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
@@ -16,15 +16,6 @@ class _LoginState extends State<Login> {
 
   double loginMessageEnable = 0.0;
   String loginMessage = "";
-
-  Future<int> _callAPI(String idText, String pwdText) async {
-    var url = Uri.parse(
-      'http://navy-combat-power-management-platform.shop/get.php',
-    );
-    var response = await Dio().postUri(url, data: {'username': idText, 'pwd': pwdText});
-    return response.data;
-  }
-
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +54,7 @@ class _LoginState extends State<Login> {
                           TextField(
                             controller: idController,
                             autofocus: true,
-                            decoration: decoTheme('군번', '군번 (- 없이 입력하세요)'),
+                            decoration: InputDeco(labelText: '군번', hintText: '군번 (- 없이 입력하세요)'),
                             keyboardType: TextInputType.number,
                           ),
 
@@ -74,7 +65,7 @@ class _LoginState extends State<Login> {
                           // 비밀번호 입력 필드
                           TextField(
                             controller: pwdController,
-                            decoration: decoTheme('비밀번호', '비밀번호'),
+                            decoration: InputDeco(labelText: '비밀번호', hintText: '비밀번호'),
                             keyboardType: TextInputType.text,
                             obscureText: true,
                           ),
@@ -92,14 +83,9 @@ class _LoginState extends State<Login> {
                           ButtonTheme(
                               child: ElevatedButton(
                                 onPressed: () {
-                                  Future<int> future = _callAPI(idController.text, pwdController.text);
-                                  future.then((val) {
+                                  SignAPIService().login(idController.text, pwdController.text).then((val) {
                                     if (val == 1) {
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (BuildContext context) =>
-                                                  MainPage(idController.text)));
+                                      Navigator.of(context).pushNamed(Routes.app, arguments: idController.text); //idController.text
                                       loginMessageEnable = 0.0;
                                     } else {
                                       setState(() {setMessage('군번 또는 비밀번호를 잘못 입력했습니다. \n입력하신 내용을 다시 확인해주세요.');});
@@ -129,11 +115,7 @@ class _LoginState extends State<Login> {
                               height: 50.0,
                               child: ElevatedButton(
                                 onPressed: () {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (BuildContext context) =>
-                                              RegisterPage()));
+                                  Navigator.of(context).pushNamed(Routes.register);
                                 },
                                 style: ElevatedButton.styleFrom(
                                     shape: RoundedRectangleBorder(
@@ -165,44 +147,4 @@ void showSnackBar(BuildContext context, Text text) {
   );
 
   ScaffoldMessenger.of(context).showSnackBar(snackBar);
-}
-
-class MainPage extends StatelessWidget {
-  String userId = '';
-  MainPage(this.userId, {Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return App(userId);
-  }
-}
-
-class RegisterPage extends StatelessWidget {
-  const RegisterPage({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Register();
-  }
-}
-
-
-InputDecoration decoTheme(title, placeholder) {
-  InputDecoration deco = InputDecoration(
-    labelText: title,
-    hintText: placeholder,
-    labelStyle: TextStyle(color: Colors.grey),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.all(Radius.circular(10.0)),
-      borderSide: BorderSide(width: 1, color: Colors.grey),
-    ),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.all(Radius.circular(10.0)),
-      borderSide: BorderSide(width: 1, color: Colors.grey),
-    ),
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.all(Radius.circular(10.0)),
-    ),
-  );
-  return deco;
 }
