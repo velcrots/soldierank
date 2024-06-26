@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_ace/routes.dart';
 import 'package:flutter_ace/src/binding/init_bindings.dart';
+import 'package:flutter_ace/src/pages/main_page/main_page.dart';
 import 'package:get/get.dart';
 import 'package:flutter_ace/src/pages/login.dart';
 import 'package:hive/hive.dart';
@@ -29,7 +30,7 @@ class MyApp extends StatelessWidget {
           )),
       initialBinding: InitBinding(),
       //home: const App(),
-      home: const Login(),
+      home: MainPage(),
     );
   }
 }
