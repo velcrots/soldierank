@@ -29,7 +29,7 @@ class SoldierankMain extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Expanded(
-          flex: 3,
+          flex: 5,
           child: Padding(
             padding: EdgeInsets.all(paddingValue),
             child: Avatar(
@@ -53,7 +53,12 @@ class SoldierankMain extends StatelessWidget {
         Expanded(
           flex: 4,
           child: Padding(
-            padding: EdgeInsets.all(paddingValue),
+            padding: EdgeInsets.fromLTRB(
+              paddingValue, // left
+              paddingValue, // top
+              paddingValue, // right
+              0, // bottom (no padding)
+            ),
             child: Info(
               joinDate: joinDate,
               dischargeDate: dischargeDate,

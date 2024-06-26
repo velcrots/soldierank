@@ -110,7 +110,7 @@ class _ProgressBarState extends State<ProgressBar> {
             ),
           ],
         ),
-        SizedBox(height: 20),
+        SizedBox(height: 10),
 
         // 휴가 및 외출 관련 프로그레스 바
         Row(
