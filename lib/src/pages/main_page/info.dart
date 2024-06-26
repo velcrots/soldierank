@@ -44,7 +44,7 @@ class Info extends StatelessWidget {
                       .inDays
                       .toString()
                   : '-'),
-          const SizedBox(height: 20),
+          const SizedBox(height: 10),
           const Text(
             '※제공되는 정보는 법적 효력 및 행정 효력이 없습니다.\n\n\n',
             style: TextStyle(fontSize: 10),
@@ -58,8 +58,8 @@ class Info extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label),
-        Text(value),
+        Text(label, style: const TextStyle(fontSize: 12)),
+        Text(value, style: const TextStyle(fontSize: 12)),
       ],
     );
   }

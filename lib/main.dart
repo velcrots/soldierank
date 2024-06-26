@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_ace/routes.dart';
+import 'package:flutter_ace/src/app.dart';
 import 'package:flutter_ace/src/binding/init_bindings.dart';
-import 'package:flutter_ace/src/pages/main_page/main_page.dart';
 import 'package:get/get.dart';
-import 'package:flutter_ace/src/pages/login.dart';
 import 'package:hive_flutter/adapters.dart';
 
 void main() async {
@@ -28,8 +27,7 @@ class MyApp extends StatelessWidget {
             titleTextStyle: TextStyle(color: Colors.black),
           )),
       initialBinding: InitBinding(),
-      //home: const App(),
-      home: MainPage(),
+      home: App(),
     );
   }
 }

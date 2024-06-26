@@ -29,7 +29,7 @@ class SoldierankMain extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Expanded(
-          flex: 4,
+          flex: 3,
           child: Padding(
             padding: EdgeInsets.all(paddingValue),
             child: Avatar(

@@ -9,16 +9,16 @@ class ToDoAPIService {
   Future<List<ToDoModel>> todo(id) async {
     try {
       var url = Uri.parse(APIPath.toDo);
-      Response<List<dynamic>> response = await Dio().postUri(url, data: {'id': id});
+      Response<List<dynamic>> response =
+          await Dio().postUri(url, data: {'id': id});
       // print('data: ${response.data}');
 
       // 투두 리스트 반환
       List<ToDoModel> toDoList = [];
-      response.data?.forEach((val){
+      response.data?.forEach((val) {
         toDoList.add(ToDoModel.fromMap(val));
       });
       return toDoList;
-
     } on Exception catch (error) {
       print('todo api error: $error');
       rethrow;
@@ -31,10 +31,11 @@ class ToDoAPIService {
       var toDoMap = toDo.toMap();
 
       var url = Uri.parse(APIPath.toDoAdd);
-      Response<int> response = await Dio().postUri(url, data: {'id': id, 'name': toDoMap['name']});
+      Response<int> response =
+          await Dio().postUri(url, data: {'id': id, 'name': toDoMap['name']});
       // print('data: ${response.data}');
 
-      return(response.data!);
+      return (response.data!);
     } on Exception catch (error) {
       print('todoAdd api error: $error');
       rethrow;
@@ -47,9 +48,12 @@ class ToDoAPIService {
       var toDoMap = toDo.toMap();
 
       var url = Uri.parse(APIPath.toDoUpdate);
-      Response<List<dynamic>> response = await Dio().postUri(url, data: {'id': toDoMap['id'], 'name': toDoMap['name'], 'isCompleted': toDoMap['isCompleted'] ? 1: 0});
+      Response<List<dynamic>> response = await Dio().postUri(url, data: {
+        'id': toDoMap['id'],
+        'name': toDoMap['name'],
+        'isCompleted': toDoMap['isCompleted'] ? 1 : 0
+      });
       // print('data: ${response.data}');
-
     } on Exception catch (error) {
       print('todoUpdate api error: $error');
       rethrow;
@@ -62,13 +66,12 @@ class ToDoAPIService {
       var toDoMap = toDo.toMap();
 
       var url = Uri.parse(APIPath.toDoDelete);
-      Response<List<dynamic>> response = await Dio().postUri(url, data: {'id': toDoMap['id']});
+      Response<List<dynamic>> response =
+          await Dio().postUri(url, data: {'id': toDoMap['id']});
       // print('data: ${response.data}');
-
     } on Exception catch (error) {
       print('todoDelete api error: $error');
       rethrow;
     }
   }
-
 }

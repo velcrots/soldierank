@@ -81,12 +81,14 @@ class _ProgressBarState extends State<ProgressBar> {
           children: [
             Text(
               '전역',
+              style: TextStyle(fontSize: 14),
               textAlign: TextAlign.left,
             ),
             Text(
               widget.dischargeDate != null
                   ? dateFormat.format(widget.dischargeDate!)
                   : '',
+              style: TextStyle(fontSize: 13),
               textAlign: TextAlign.right,
             ),
           ],
@@ -103,6 +105,7 @@ class _ProgressBarState extends State<ProgressBar> {
           children: [
             Text(
               '${(dischargePercent * 100).toStringAsFixed(9)}%',
+              style: TextStyle(fontSize: 13),
               textAlign: TextAlign.right,
             ),
           ],
@@ -122,12 +125,14 @@ class _ProgressBarState extends State<ProgressBar> {
                     children: [
                       Text(
                         '휴가',
+                        style: TextStyle(fontSize: 13),
                         textAlign: TextAlign.left,
                       ),
                       Text(
                         widget.nextVacationDate != null
                             ? dateFormat.format(widget.nextVacationDate!)
                             : '',
+                        style: TextStyle(fontSize: 12),
                         textAlign: TextAlign.right,
                       ),
                     ],
@@ -144,6 +149,7 @@ class _ProgressBarState extends State<ProgressBar> {
                     children: [
                       Text(
                         '${(vacationPercent * 100).toStringAsFixed(6)}%',
+                        style: TextStyle(fontSize: 12),
                         textAlign: TextAlign.left,
                       ),
                     ],
@@ -163,12 +169,14 @@ class _ProgressBarState extends State<ProgressBar> {
                     children: [
                       Text(
                         '외출',
+                        style: TextStyle(fontSize: 13),
                         textAlign: TextAlign.left,
                       ),
                       Text(
                         widget.nextEgressionDate != null
                             ? dateFormat.format(widget.nextEgressionDate!)
                             : '',
+                        style: TextStyle(fontSize: 12),
                         textAlign: TextAlign.right,
                       ),
                     ],
@@ -185,6 +193,7 @@ class _ProgressBarState extends State<ProgressBar> {
                     children: [
                       Text(
                         '${(egressionPercent * 100).toStringAsFixed(6)}%',
+                        style: TextStyle(fontSize: 12),
                         textAlign: TextAlign.right,
                       ),
                     ],
