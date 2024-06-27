@@ -27,12 +27,12 @@ class VacationAPIService {
   }
 
   /// 휴가 추가 (휴가의 인덱스값 반환)
-  Future<int> vacationAdd(VacationModel vacation) async {
+  Future<String> vacationAdd(VacationModel vacation) async {
     try {
       var vacationMap = vacation.toMap();
 
       var url = Uri.parse(APIPath.vacationAdd);
-      Response<int> response = await Dio().postUri(url, data: {
+      Response<String> response = await Dio().postUri(url, data: {
         'user_id': vacationMap['user_id'],
         'start': vacationMap['start'],
         'end': vacationMap['end']});
