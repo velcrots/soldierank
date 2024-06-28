@@ -23,4 +23,10 @@ class APIPath {
   static const String  vacationAdd = '${origin2}vacation/vacationAdd.php';
   static const String  vacationUpdate = '${origin2}vacation/vacationUpdate.php';
   static const String  vacationDelete = '${origin2}vacation/vacationDelete.php';
+
+  // 외출
+  static const String  egression = '${origin2}egression/egression.php';
+  static const String  egressionAdd = '${origin2}egression/egressionAdd.php';
+  static const String  egressionUpdate = '${origin2}egression/egressionUpdate.php';
+  static const String  egressionDelete = '${origin2}egression/egressionDelete.php';
 }
