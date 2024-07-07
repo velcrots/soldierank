@@ -38,10 +38,10 @@ class MainUserModel {
   /// GroupUserInfo 객체를 Map 데이터 형식으로 변환
   Map<String, dynamic> toMap() => {
     '군별': soldierType,
-    '입대일': joinDate,
-    '전역일': dischargeDate,
-    '최근_복귀일': preOutingDate,
-    '휴가_출발_날짜': nextVacationDate,
-    '외출_출발_날짜': nextEgressionDate
+    '입대일': joinDate.toString(),
+    '전역일': dischargeDate.toString(),
+    '최근_복귀일': preOutingDate.toString(),
+    '휴가_출발_날짜': nextVacationDate.toString(),
+    '외출_출발_날짜': nextEgressionDate.toString()
   };
 }

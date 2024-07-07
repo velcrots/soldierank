@@ -48,7 +48,7 @@ class ToDoAPIService {
       var toDoMap = toDo.toMap();
 
       var url = Uri.parse(APIPath.toDoUpdate);
-      Response<List<dynamic>> response = await Dio().postUri(url, data: {
+      Response<int> response = await Dio().postUri(url, data: {
         'id': toDoMap['id'],
         'name': toDoMap['name'],
         'isCompleted': toDoMap['isCompleted'] ? 1 : 0
@@ -66,7 +66,7 @@ class ToDoAPIService {
       var toDoMap = toDo.toMap();
 
       var url = Uri.parse(APIPath.toDoDelete);
-      Response<List<dynamic>> response =
+      Response<int> response =
           await Dio().postUri(url, data: {'id': toDoMap['id']});
       // print('data: ${response.data}');
     } on Exception catch (error) {

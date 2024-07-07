@@ -64,13 +64,12 @@ class _TodoPageState extends State<TodoPage> {
             onChanged: (value) {
               setState(() {
                 task.isCompleted = value!;
-                db.updateDataBase(task);  // 변경된 데이터를 데이터베이스에 업데이트
+                db.updateDataBase(task).then((value) => setState(() {}));  // 변경된 데이터를 데이터베이스에 업데이트
               });
             },
             onDelete: () {
               setState(() {
-                db.toDoList.remove(task);  // 할 일 목록에서 해당 아이템 삭제
-                db.deleteDataBase(task);  // 변경된 데이터를 데이터베이스에 업데이트
+                db.deleteDataBase(task).then((value) => setState(() {}));  // 할 일 목록에서 해당 아이템 삭제
               });
             },
           );
@@ -94,8 +93,8 @@ class _TodoPageState extends State<TodoPage> {
         onSave: () {
           setState(() {
             var newTask = ToDoModel(name: _taskController.text);  // 입력한 텍스트를 기반으로 새로운 할 일 생성
-            db.toDoList.add(newTask);  // 할 일 목록에 새로운 아이템 추가
-            db.addDataBase(newTask);  // 변경된 데이터를 데이터베이스에 업데이트
+
+            db.addDataBase(newTask).then((value) => setState(() {}));  // 할 일 목록에 새로운 아이템 추가
             _taskController.clear();  // 입력 필드 초기화
           });
           Navigator.of(context).pop();  // 다이얼로그 닫기
