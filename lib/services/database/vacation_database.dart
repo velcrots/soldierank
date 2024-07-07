@@ -25,6 +25,7 @@ class VacationDatabase {
   Future<void> addDataBase(VacationModel vacation) async {
     await VacationAPIService().vacationAdd(vacation).then((val) {
       vacation.vacation_id = val;
+      vacationList.add(vacation);
     }).catchError((error) {
       print('vacationAdd database error: $error');
     });
@@ -32,8 +33,8 @@ class VacationDatabase {
 
   /// 휴가 업데이트
   Future<void> updateDataBase(VacationModel vacation) async {
-    await VacationAPIService().vacationUpdate(vacation).then((val) {
-      //
+    await VacationAPIService().vacationUpdate(vacation).then((val) async {
+      await loadData();
     }).catchError((error) {
       print('vacationUpdate database error: $error');
     });
@@ -42,7 +43,7 @@ class VacationDatabase {
   /// 휴가 삭제
   Future<void> deleteDataBase(VacationModel vacation) async {
     await VacationAPIService().vacationDelete(vacation).then((val) {
-      //
+      vacationList.removeWhere((a)=> a.vacation_id == vacation.vacation_id);
     }).catchError((error) {
       print('vacationDelete database error: $error');
     });

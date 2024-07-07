@@ -11,7 +11,7 @@ class VacationAPIService {
       var url = Uri.parse(APIPath.vacation);
       Response<List<dynamic>> response = await Dio().postUri(url, data: {
         'user_id': user_id});
-      print('vacation data: ${response.data}');
+      //print('vacation data: ${response.data}');
 
       // 휴가 리스트 반환
       List<VacationModel> vacationList = [];
@@ -36,7 +36,7 @@ class VacationAPIService {
         'user_id': vacationMap['user_id'],
         'start': vacationMap['start'],
         'end': vacationMap['end']});
-      print('vacation index: ${response.data}');
+      //print('vacation index: ${response.data}');
 
       return(response.data!);
     } on Exception catch (error) {

@@ -26,27 +26,28 @@ class ToDoDatabase {
   }
 
   /// 투두 추가
-  Future<void> addDataBase(toDo) async {
+  Future<void> addDataBase(ToDoModel toDo) async {
     await ToDoAPIService().todoAdd(App.userId, toDo).then((val) {
       toDo.id = val;
+      toDoList.add(toDo);
     }).catchError((error) {
       print('todoAdd database error: $error');
     });
   }
 
   /// 투두 업데이트
-  Future<void> updateDataBase(toDo) async {
-    await ToDoAPIService().todoUpdate(App.userId, toDo).then((val) {
-      //
+  Future<void> updateDataBase(ToDoModel toDo) async {
+    await ToDoAPIService().todoUpdate(App.userId, toDo).then((val) async {
+      await loadData();
     }).catchError((error) {
       print('todoUpdate database error: $error');
     });
   }
 
   /// 투두 삭제
-  Future<void> deleteDataBase(toDo) async {
+  Future<void> deleteDataBase(ToDoModel toDo) async {
     await ToDoAPIService().todoDelete(App.userId, toDo).then((val) {
-      //
+      toDoList.removeWhere((a)=> a.id == toDo.id);
     }).catchError((error) {
       print('todoDelete database error: $error');
     });

@@ -25,6 +25,7 @@ class EgressionDatabase {
   Future<void> addDataBase(EgressionModel egression) async {
     await EgressionAPIService().egressionAdd(egression).then((val) {
       egression.egression_id = val;
+      egressionList.add(egression);
     }).catchError((error) {
       print('egressionnAdd database error: $error');
     });
@@ -32,8 +33,8 @@ class EgressionDatabase {
 
   /// 외출 업데이트
   Future<void> updateDataBase(EgressionModel egression) async {
-    await EgressionAPIService().egressionUpdate(egression).then((val) {
-      //
+    await EgressionAPIService().egressionUpdate(egression).then((val) async {
+      await loadData();
     }).catchError((error) {
       print('egressionUpdate database error: $error');
     });
@@ -42,7 +43,7 @@ class EgressionDatabase {
   /// 외출 삭제
   Future<void> deleteDataBase(EgressionModel egression) async {
     await EgressionAPIService().egressionDelete(egression).then((val) {
-      //
+      egressionList.removeWhere((a)=> a.egression_id == egression.egression_id);
     }).catchError((error) {
       print('egressionDelete database error: $error');
     });

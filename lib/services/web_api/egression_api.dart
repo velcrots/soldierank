@@ -11,7 +11,7 @@ class EgressionAPIService {
       var url = Uri.parse(APIPath.egression);
       Response<List<dynamic>> response = await Dio().postUri(url, data: {
         'user_id': user_id});
-      print('egression data: ${response.data}');
+      //print('egression data: ${response.data}');
 
       // 외출 리스트 반환
       List<EgressionModel> egressionList = [];
@@ -35,7 +35,7 @@ class EgressionAPIService {
       Response<String> response = await Dio().postUri(url, data: {
         'user_id': egressionMap['user_id'],
         'start': egressionMap['start'],});
-      print('egression index: ${response.data}');
+      //print('egression index: ${response.data}');
 
       return(response.data!);
     } on Exception catch (error) {
